@@ -468,35 +468,6 @@ EVENT_PITCH findMidiPitchFromFrequency(unsigned short frequency)
   };
 }
 
-//size_t fbigwrite(void* ptr, int numBytes, FILE * f)
-//{
-//  switch(numBytes)
-//  {
-//  case 1:
-//    return fwrite(ptr, 1, numBytes, f);
-//  case 2:
-//    {
-//      char buffer[2];
-//      _swab((char*)ptr, buffer, numBytes);
-//      return fwrite(&buffer, 1, numBytes, f);
-//    }
-//  case 4:
-//    {
-//      char buffer[4];
-//      _swab((char*)ptr, buffer, numBytes);
-//      return fwrite(&buffer, 1, numBytes, f);
-//    }
-//  case 8:
-//    {
-//      char buffer[8];
-//      _swab((char*)ptr, buffer, numBytes);
-//      return fwrite(&buffer, 1, numBytes, f);
-//    }
-//  };
-//
-//  throw "ERROR. Unexpected data size";
-//}
-
 template <typename T>
 void swap_endian(T& u)
 {
