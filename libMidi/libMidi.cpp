@@ -47,6 +47,7 @@ static const MIDI_TYPE MIDI_TYPE_1 = 1;
 
 //events handling
 typedef int8_t EVENT_TIMESTAMP;
+static const EVENT_TIMESTAMP TIMESTAMP_MULTIPLICATOR_MASK = (char)0x80;
 typedef int8_t EVENT_STATUS;
 static const EVENT_STATUS NOTE_ON_CHANNEL_0 = (char)0x90;
 static const EVENT_STATUS NOTE_OFF_CHANNEL_0 = (char)0xB0;
@@ -87,21 +88,16 @@ struct BASIC_EVENT1
 };
 struct BASIC_EVENT2
 {
-  EVENT_TIMESTAMP timestamps[2];
+  EVENT_TIMESTAMP timestampMultiplicator;
+  EVENT_TIMESTAMP timestamp;
   EVENT_STATUS status;
   EVENT_PITCH pitch;
   EVENT_VOLUME volume;
 };
 struct BASIC_EVENT2_RUNNING_STATUS
 {
-  EVENT_TIMESTAMP timestamps[2];
-  EVENT_PITCH pitch;
-  EVENT_VOLUME volume;
-};
-struct BASIC_EVENT3
-{
-  EVENT_TIMESTAMP timestamps[3];
-  EVENT_STATUS status;
+  EVENT_TIMESTAMP timestampMultiplicator;
+  EVENT_TIMESTAMP timestamp;
   EVENT_PITCH pitch;
   EVENT_VOLUME volume;
 };
@@ -331,7 +327,7 @@ struct META_EVENT
 
 
 
-EVENT_PITCH findNotePitchFromFrequency(unsigned short frequency)
+EVENT_PITCH findMidiPitchFromFrequency(unsigned short frequency)
 {
 #define DECLARE_PITCH(midiPitchId, note_frequency) \
   case note_frequency:  \
@@ -472,6 +468,55 @@ EVENT_PITCH findNotePitchFromFrequency(unsigned short frequency)
   };
 }
 
+//size_t fbigwrite(void* ptr, int numBytes, FILE * f)
+//{
+//  switch(numBytes)
+//  {
+//  case 1:
+//    return fwrite(ptr, 1, numBytes, f);
+//  case 2:
+//    {
+//      char buffer[2];
+//      _swab((char*)ptr, buffer, numBytes);
+//      return fwrite(&buffer, 1, numBytes, f);
+//    }
+//  case 4:
+//    {
+//      char buffer[4];
+//      _swab((char*)ptr, buffer, numBytes);
+//      return fwrite(&buffer, 1, numBytes, f);
+//    }
+//  case 8:
+//    {
+//      char buffer[8];
+//      _swab((char*)ptr, buffer, numBytes);
+//      return fwrite(&buffer, 1, numBytes, f);
+//    }
+//  };
+//
+//  throw "ERROR. Unexpected data size";
+//}
+
+template <typename T>
+void swap_endian(T& u)
+{
+  if (sizeof(u) == 1)
+    return;
+
+  union
+  {
+    T u;
+    unsigned char u8[sizeof(T)];
+  } source, dest;
+
+  source.u = u;
+
+  for (size_t k = 0; k < sizeof(T); k++)
+    dest.u8[k] = source.u8[sizeof(T) - k - 1];
+
+  u = dest.u;
+}
+
 //unsigned short findDuration(unsigned short iBpm, unsigned short iTicksPerQuarterNote)
 //{
 //  unsigned short durationMs = 60000 / (iBpm * iTicksPerQuarterNote);
@@ -507,6 +552,60 @@ void MidiFile::setName(const char * iName)
   mName = iName;
 }
 
+size_t fswapwrite(const MIDI_HEADER & iHeader, FILE * f)
+{
+  MIDI_HEADER tmp = iHeader;
+  swap_endian(tmp.id);
+  swap_endian(tmp.length);
+  swap_endian(tmp.type);
+  swap_endian(tmp.numTracks);
+  swap_endian(tmp.ticksPerQuarterNote);
+  return fwrite(&tmp, 1, sizeof(tmp), f);
+}
+size_t fswapwrite(const TRACK_HEADER & iHeader, FILE * f)
+{
+  TRACK_HEADER tmp = iHeader;
+  swap_endian(tmp.id);
+  swap_endian(tmp.length);
+  return fwrite(&tmp, 1, sizeof(tmp), f);
+}
+size_t fswapwrite(const BASIC_EVENT2 & e, FILE * f)
+{
+  BASIC_EVENT2 tmp = e;
+  swap_endian(tmp.timestampMultiplicator);
+  swap_endian(tmp.timestamp);
+  swap_endian(tmp.status   );
+  swap_endian(tmp.pitch    );
+  swap_endian(tmp.volume   );
+  return fwrite(&tmp, 1, sizeof(tmp), f);
+}
+size_t fswapwrite(const BASIC_EVENT2_RUNNING_STATUS & e, FILE * f)
+{
+  BASIC_EVENT2_RUNNING_STATUS tmp = e;
+  //uint16_t * ptr = (unsigned short*)tmp.timestamps;
+  //swap_endian( *ptr );
+  swap_endian(tmp.timestampMultiplicator);
+  swap_endian(tmp.timestamp);
+  swap_endian(tmp.pitch    );
+  swap_endian(tmp.volume   );
+  return fwrite(&tmp, 1, sizeof(tmp), f);
+}
+size_t fswapwrite(const META_EVENT & e, FILE * f)
+{
+  META_EVENT tmp = e;
+  swap_endian(tmp.timestamp);
+  swap_endian(tmp.status   );
+  swap_endian(tmp.type     );
+  swap_endian(tmp.size     );
+  return fwrite(&tmp, 1, sizeof(tmp), f);
+}
+size_t fswapwrite(const HEADER_ID & id, FILE * f)
+{
+  HEADER_ID tmp = id;
+  swap_endian(tmp);
+  return fwrite(&tmp, 1, sizeof(tmp), f);
+}
+
 bool MidiFile::save(const char * iFile)
 {
   MIDI_HEADER h;
@@ -518,14 +617,17 @@ bool MidiFile::save(const char * iFile)
 
   TRACK_HEADER t;
   t.id = MIDI_TRACK_HEADER_ID;
-  t.length = 4*mNotes.size() + 4 /*NoteStop*/ + sizeof(MIDI_TRACK_FOOTER_ID);
+  t.length = 0; //must be computed as we write data. The value will be written again once all the file is generated. ~4*mNotes.size() + 4 /*NoteStop*/ + sizeof(MIDI_TRACK_FOOTER_ID);
 
-  FILE * f = fopen(iFile, "wb");
-  if (!f)
+  FILE * fout = fopen(iFile, "wb");
+  if (!fout)
     return false;
 
-  fwrite(&h, 1, sizeof(h), f);
-  fwrite(&t, 1, sizeof(t), f);
+  //write header
+  fswapwrite(h, fout);
+
+  //write header
+  fswapwrite(t, fout);
 
   if (mName != "")
   {
@@ -536,8 +638,11 @@ bool MidiFile::save(const char * iFile)
     e.size = mName.size();
 
     //dump
-    fwrite(&e, 1, sizeof(e), f);
-    fwrite(mName.c_str(), 1, e.size, f);
+    fswapwrite(e, fout);
+    fwrite(mName.c_str(), 1, e.size, fout);
+    
+    //update track length
+    t.length += e.size;
   }
 
   //calculate duration of the note in ticks
@@ -553,25 +658,31 @@ bool MidiFile::save(const char * iFile)
     if (i == 0)
     {
       BASIC_EVENT2 e;
-      e.timestamps[0] = noteTicks/127;
-      e.timestamps[0] = noteTicks%127;
+      e.timestampMultiplicator = ((noteTicks/127)) | TIMESTAMP_MULTIPLICATOR_MASK;
+      e.timestamp = noteTicks%127;
       e.status = NOTE_ON_CHANNEL_0;
-      e.pitch = findNotePitchFromFrequency(n.frequency);
+      e.pitch = findMidiPitchFromFrequency(n.frequency);
       e.volume = 0x60;
 
       //dump
-      fwrite(&e, 1, sizeof(e), f);
+      fswapwrite(e, fout);
+      
+      //update track length
+      t.length += sizeof(e);
     }
     else
     {
       BASIC_EVENT2_RUNNING_STATUS e;
-      e.timestamps[0] = noteTicks/127;
-      e.timestamps[0] = noteTicks%127;
-      e.pitch = findNotePitchFromFrequency(n.frequency);
+      e.timestampMultiplicator = ((noteTicks/127)) | TIMESTAMP_MULTIPLICATOR_MASK;
+      e.timestamp = noteTicks%127;
+      e.pitch = findMidiPitchFromFrequency(n.frequency);
       e.volume = 0x60;
 
       //dump
-      fwrite(&e, 1, sizeof(e), f);
+      fswapwrite(e, fout);
+      
+      //update track length
+      t.length += sizeof(e);
     }
 
     //remember previous note duration
@@ -582,19 +693,31 @@ bool MidiFile::save(const char * iFile)
   //silence all notes
   {
     BASIC_EVENT2 e;
-    e.timestamps[0] = noteTicks/127;
-    e.timestamps[0] = noteTicks%127;
+    e.timestampMultiplicator = ((noteTicks/127)) | TIMESTAMP_MULTIPLICATOR_MASK;
+    e.timestamp = noteTicks%127;
     e.status = NOTE_OFF_CHANNEL_0;
     e.pitch = SILENCE_ALL_NOTE;
     e.volume = MIN_VOLUME;
 
     //dump
-    fwrite(&e, 1, sizeof(e), f);
+    fswapwrite(e, fout);
+    
+    //update track length
+    t.length += sizeof(e);
   }
 
   //add track footer
-  fwrite(&MIDI_TRACK_FOOTER_ID, 1, sizeof(MIDI_TRACK_FOOTER_ID), f);
+  fswapwrite(MIDI_TRACK_FOOTER_ID, fout);
 
-  fclose(f);
+  //update track length
+  t.length += sizeof(MIDI_TRACK_FOOTER_ID);
+
+  //write FILE & TRACK headers again
+  fseek(fout, 0, SEEK_SET);
+  fswapwrite(h, fout);
+  fswapwrite(t, fout);
+
+
+  fclose(fout);
   return true;
 }
