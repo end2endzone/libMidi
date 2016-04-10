@@ -206,6 +206,14 @@
 				RelativePath=".\libMidi.h"
 				>
 			</File>
+			<File
+				RelativePath=".\miditypes.h"
+				>
+			</File>
+			<File
+				RelativePath=".\varlength.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
