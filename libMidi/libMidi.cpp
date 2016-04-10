@@ -16,16 +16,8 @@
 
 
 #include "libMidi.h"
-
-//#include <cstdint>
-//#include <stdint.h>
-typedef __int32 int32_t;
-typedef unsigned __int32 uint32_t;
-typedef short int16_t;
-typedef unsigned short uint16_t;
-typedef char int8_t;
-typedef unsigned char uint8_t;
-
+#include "miditypes.h"
+#include "varlength.h"
 
 //typedef FILE_HEADER uint32_t;
 
@@ -50,10 +42,10 @@ typedef int8_t EVENT_TIMESTAMP;
 static const EVENT_TIMESTAMP TIMESTAMP_MULTIPLICATOR_MASK = (char)0x80;
 typedef int8_t EVENT_STATUS;
 static const EVENT_STATUS NOTE_ON_CHANNEL_0 = (char)0x90;
-static const EVENT_STATUS NOTE_OFF_CHANNEL_0 = (char)0xB0;
+static const EVENT_STATUS CONTROLCHANGE_B_CHANNEL_0 = (char)0xB0;
 static const EVENT_STATUS EVENT_META = (char)0xFF;
 typedef int8_t EVENT_PITCH; //note code
-static const EVENT_PITCH SILENCE_ALL_NOTE = (char)0x00;
+static const EVENT_PITCH ALL_NOTES_OFF = (char)0x7B;
 typedef int8_t EVENT_VOLUME; //from 0 to 7F
 static const EVENT_VOLUME MIN_VOLUME = (char)0x00;
 static const EVENT_VOLUME MAX_VOLUME = (char)0x7F;
@@ -79,28 +71,28 @@ struct TRACK_HEADER
   HEADER_ID id; //see DEFAULT_FILE_HEADER
   uint32_t length; //including data size & track footer
 };
-struct BASIC_EVENT1
+struct NOTE_EVENT
 {
-  EVENT_TIMESTAMP timestamp;
+  uint32_t ticks;
   EVENT_STATUS status;
   EVENT_PITCH pitch;
   EVENT_VOLUME volume;
 };
-struct BASIC_EVENT2
-{
-  EVENT_TIMESTAMP timestampMultiplicator;
-  EVENT_TIMESTAMP timestamp;
-  EVENT_STATUS status;
-  EVENT_PITCH pitch;
-  EVENT_VOLUME volume;
-};
-struct BASIC_EVENT2_RUNNING_STATUS
-{
-  EVENT_TIMESTAMP timestampMultiplicator;
-  EVENT_TIMESTAMP timestamp;
-  EVENT_PITCH pitch;
-  EVENT_VOLUME volume;
-};
+//struct BASIC_EVENT2
+//{
+//  EVENT_TIMESTAMP timestampMultiplicator;
+//  EVENT_TIMESTAMP timestamp;
+//  EVENT_STATUS status;
+//  EVENT_PITCH pitch;
+//  EVENT_VOLUME volume;
+//};
+//struct BASIC_EVENT2_RUNNING_STATUS
+//{
+//  EVENT_TIMESTAMP timestampMultiplicator;
+//  EVENT_TIMESTAMP timestamp;
+//  EVENT_PITCH pitch;
+//  EVENT_VOLUME volume;
+//};
 struct META_EVENT
 {
   EVENT_TIMESTAMP timestamp;
@@ -488,6 +480,8 @@ void swap_endian(T& u)
   u = dest.u;
 }
 
+
+
 //unsigned short findDuration(unsigned short iBpm, unsigned short iTicksPerQuarterNote)
 //{
 //  unsigned short durationMs = 60000 / (iBpm * iTicksPerQuarterNote);
@@ -540,26 +534,75 @@ size_t fswapwrite(const TRACK_HEADER & iHeader, FILE * f)
   swap_endian(tmp.length);
   return fwrite(&tmp, 1, sizeof(tmp), f);
 }
-size_t fswapwrite(const BASIC_EVENT2 & e, FILE * f)
+size_t fwriteevent(const NOTE_EVENT & e, bool isRunningStatus, FILE * f)
 {
-  BASIC_EVENT2 tmp = e;
-  swap_endian(tmp.timestampMultiplicator);
-  swap_endian(tmp.timestamp);
-  swap_endian(tmp.status   );
-  swap_endian(tmp.pitch    );
+  size_t writeSize = 0;
+
+  NOTE_EVENT tmp = e;
+  
+  //EVENT_TIMESTAMP timestamps[4] = {0}; //MAX 0xFF 0xFF 0xFF 0xFF
+  //                                     //    [3]  [2]  [1]  [0]
+
+  //static const uint32_t MASK_TIMESTAMP_1 =  ((1<<7)-1);
+  //static const uint32_t MASK_TIMESTAMP_2 =  ((1<<14)-1) - MASK_TIMESTAMP_1;
+  //static const uint32_t MASK_TIMESTAMP_3 =  ((1<<21)-1) - MASK_TIMESTAMP_2;
+  //static const uint32_t MASK_TIMESTAMP_4 =  ((1<<28)-1) - MASK_TIMESTAMP_3;
+
+  ////max	65024,	32512,	16256,	127
+  ////min	32513,	16257,	128,	  0
+  //if (0 <= e.ticks && e.ticks <= 127)
+  //{
+  //  //no mask to set
+  //}
+  //else if (128 <= e.ticks && e.ticks <= 16256)
+  //{
+  //  timestamps[1] |= TIMESTAMP_MULTIPLICATOR_MASK;
+  //}
+  //else if (16257 <= e.ticks && e.ticks <= 32512)
+  //{
+  //  timestamps[2] |= TIMESTAMP_MULTIPLICATOR_MASK;
+  //  timestamps[1] |= TIMESTAMP_MULTIPLICATOR_MASK;
+  //}
+  //else if (32513 <= e.ticks && e.ticks <= 65024)
+  //{
+  //  timestamps[3] |= TIMESTAMP_MULTIPLICATOR_MASK;
+  //  timestamps[2] |= TIMESTAMP_MULTIPLICATOR_MASK;
+  //  timestamps[1] |= TIMESTAMP_MULTIPLICATOR_MASK;
+  //}
+
+  ////EDIT: always force a minimum of 2 characters for dumping timestamps
+  //timestamps[1] |= TIMESTAMP_MULTIPLICATOR_MASK;
+
+  ////dump e.ticks bits into their containers
+  //timestamps[0] |= (e.ticks & MASK_TIMESTAMP_1) >> 0;
+  //timestamps[1] |= (e.ticks & MASK_TIMESTAMP_2) >> 7;
+  //timestamps[2] |= (e.ticks & MASK_TIMESTAMP_3) >> 14;
+  //timestamps[3] |= (e.ticks & MASK_TIMESTAMP_4) >> 21;
+
+  ////fwrite ticks container
+  //for(int i=0; i<4; i++)
+  //{
+  //  if ((timestamps[i] | TIMESTAMP_MULTIPLICATOR_MASK) > 0)
+  //  {
+  //    //multiplicator bit set. Dump this container
+  //    writeSize += fwrite(&timestamps[i], 1, sizeof(timestamps[i]), f);
+  //  }
+  //}
+  writeSize += fwriteVariableLength(e.ticks, 2, f);
+
+  if (!isRunningStatus)
+  {
+    swap_endian(tmp.status   );
+    writeSize += fwrite(&tmp.status, 1, sizeof(tmp.status), f);
+  }
+
+  swap_endian(tmp.pitch   );
+  writeSize += fwrite(&tmp.pitch, 1, sizeof(tmp.pitch), f);
+
   swap_endian(tmp.volume   );
-  return fwrite(&tmp, 1, sizeof(tmp), f);
-}
-size_t fswapwrite(const BASIC_EVENT2_RUNNING_STATUS & e, FILE * f)
-{
-  BASIC_EVENT2_RUNNING_STATUS tmp = e;
-  //uint16_t * ptr = (unsigned short*)tmp.timestamps;
-  //swap_endian( *ptr );
-  swap_endian(tmp.timestampMultiplicator);
-  swap_endian(tmp.timestamp);
-  swap_endian(tmp.pitch    );
-  swap_endian(tmp.volume   );
-  return fwrite(&tmp, 1, sizeof(tmp), f);
+  writeSize += fwrite(&tmp.volume, 1, sizeof(tmp.volume), f);
+
+  return writeSize;
 }
 size_t fswapwrite(const META_EVENT & e, FILE * f)
 {
@@ -582,7 +625,7 @@ bool MidiFile::save(const char * iFile)
   MIDI_HEADER h;
   h.id = MIDI_FILE_ID;
   h.length = 6;
-  h.type = MIDI_TYPE_0;
+  h.type = MIDI_TYPE_1;
   h.numTracks = 1;
   h.ticksPerQuarterNote = mTicksPerQuarterNote;
 
@@ -617,8 +660,8 @@ bool MidiFile::save(const char * iFile)
   }
 
   //calculate duration of the note in ticks
-  //simulate 127 first, then 128 for all subsequent notes
-  static int noteTicks = 127;
+  //simulate 0 first, then 128 for all subsequent notes
+  static int noteTicks = 0;
 
   //unsigned short previousNoteDurationMs = 0;
   for(size_t i=0; i<mNotes.size(); i++)
@@ -628,53 +671,40 @@ bool MidiFile::save(const char * iFile)
     //build an event for the note
     if (i == 0)
     {
-      BASIC_EVENT2 e;
-      e.timestampMultiplicator = ((noteTicks/127)) | TIMESTAMP_MULTIPLICATOR_MASK;
-      e.timestamp = noteTicks%127;
+      NOTE_EVENT e;
+      e.ticks = noteTicks;
       e.status = NOTE_ON_CHANNEL_0;
       e.pitch = findMidiPitchFromFrequency(n.frequency);
       e.volume = 0x60;
 
       //dump
-      fswapwrite(e, fout);
-      
-      //update track length
-      t.length += sizeof(e);
+      t.length += fwriteevent(e, false, fout);
     }
     else
     {
-      BASIC_EVENT2_RUNNING_STATUS e;
-      e.timestampMultiplicator = ((noteTicks/127)) | TIMESTAMP_MULTIPLICATOR_MASK;
-      e.timestamp = noteTicks%127;
+      NOTE_EVENT e;
+      e.ticks = noteTicks;
       e.pitch = findMidiPitchFromFrequency(n.frequency);
       e.volume = 0x60;
 
       //dump
-      fswapwrite(e, fout);
-      
-      //update track length
-      t.length += sizeof(e);
+      t.length += fwriteevent(e, true, fout);
     }
 
     //remember previous note duration
-    noteTicks++;
-    if (noteTicks > 128) noteTicks=128;
+    noteTicks = 128;
   }
 
   //silence all notes
   {
-    BASIC_EVENT2 e;
-    e.timestampMultiplicator = ((noteTicks/127)) | TIMESTAMP_MULTIPLICATOR_MASK;
-    e.timestamp = noteTicks%127;
-    e.status = NOTE_OFF_CHANNEL_0;
-    e.pitch = SILENCE_ALL_NOTE;
+    NOTE_EVENT e;
+    e.ticks = noteTicks;
+    e.status = CONTROLCHANGE_B_CHANNEL_0;
+    e.pitch = ALL_NOTES_OFF;
     e.volume = MIN_VOLUME;
 
     //dump
-    fswapwrite(e, fout);
-    
-    //update track length
-    t.length += sizeof(e);
+    t.length += fwriteevent(e, false, fout);
   }
 
   //add track footer
