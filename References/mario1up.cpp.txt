@@ -1,0 +1,14 @@
+void playMario1up(int pin) {
+  tone(pin,1319,125);
+  delay(126);
+  tone(pin,1568,125);
+  delay(126);
+  tone(pin,2637,125);
+  delay(126);
+  tone(pin,2093,125);
+  delay(126);
+  tone(pin,2349,125);
+  delay(126);
+  tone(pin,3136,125);
+  delay(126);
+}
