@@ -11,7 +11,7 @@ void testCDE()
   f.addNote(262, 100); //C4
   f.addNote(294, 100); //D4
   f.addNote(330, 100); //E4
-  f.save("cde.output.mid");
+  f.save("testCDE.output.mid");
 }
 
 int _tmain(int argc, _TCHAR* argv[])
