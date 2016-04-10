@@ -19,8 +19,6 @@
 #include "miditypes.h"
 #include "varlength.h"
 
-//typedef FILE_HEADER uint32_t;
-
 typedef uint32_t HEADER_ID;
 static const HEADER_ID MIDI_FILE_ID = 0x4d546864; //"MThd"
 static const HEADER_ID MIDI_TRACK_HEADER_ID = 0x4d54726b; //"MTrk"
@@ -29,13 +27,6 @@ static const HEADER_ID MIDI_TRACK_FOOTER_ID = 0x00ff2f00;
 typedef uint16_t MIDI_TYPE;
 static const MIDI_TYPE MIDI_TYPE_0 = 0;
 static const MIDI_TYPE MIDI_TYPE_1 = 1;
-
-//typedef TRACK_HEADER uint32_t;
-//typedef TRACK_FOOTER uint32_t;
-//
-//typedef TRACK_SIZE uint32_t;
-//
-//static const TRACK_HREADER SINGLE_TRACK_HEADER = 0;
 
 //events handling
 typedef int8_t EVENT_TIMESTAMP;
@@ -53,8 +44,6 @@ typedef int8_t META_TYPE;
 static const META_TYPE META_SONG_NAME = (char)0x03;
 static const META_TYPE META_UNKNOWN = (char)0x51;
 typedef int8_t META_SIZE;
-
-typedef int8_t EVENT_VOLUME; //from 0 to 7F
 
 
 #pragma pack(push, 1) // exact fit - no padding
@@ -78,21 +67,6 @@ struct NOTE_EVENT
   EVENT_PITCH pitch;
   EVENT_VOLUME volume;
 };
-//struct BASIC_EVENT2
-//{
-//  EVENT_TIMESTAMP timestampMultiplicator;
-//  EVENT_TIMESTAMP timestamp;
-//  EVENT_STATUS status;
-//  EVENT_PITCH pitch;
-//  EVENT_VOLUME volume;
-//};
-//struct BASIC_EVENT2_RUNNING_STATUS
-//{
-//  EVENT_TIMESTAMP timestampMultiplicator;
-//  EVENT_TIMESTAMP timestamp;
-//  EVENT_PITCH pitch;
-//  EVENT_VOLUME volume;
-//};
 struct META_EVENT
 {
   EVENT_TIMESTAMP timestamp;
@@ -480,14 +454,6 @@ void swap_endian(T& u)
   u = dest.u;
 }
 
-
-
-//unsigned short findDuration(unsigned short iBpm, unsigned short iTicksPerQuarterNote)
-//{
-//  unsigned short durationMs = 60000 / (iBpm * iTicksPerQuarterNote);
-//  return 0;
-//}
-
 MidiFile::MidiFile()
 {
   mTicksPerQuarterNote = 128;
@@ -540,55 +506,7 @@ size_t fwriteevent(const NOTE_EVENT & e, bool isRunningStatus, FILE * f)
 
   NOTE_EVENT tmp = e;
   
-  //EVENT_TIMESTAMP timestamps[4] = {0}; //MAX 0xFF 0xFF 0xFF 0xFF
-  //                                     //    [3]  [2]  [1]  [0]
-
-  //static const uint32_t MASK_TIMESTAMP_1 =  ((1<<7)-1);
-  //static const uint32_t MASK_TIMESTAMP_2 =  ((1<<14)-1) - MASK_TIMESTAMP_1;
-  //static const uint32_t MASK_TIMESTAMP_3 =  ((1<<21)-1) - MASK_TIMESTAMP_2;
-  //static const uint32_t MASK_TIMESTAMP_4 =  ((1<<28)-1) - MASK_TIMESTAMP_3;
-
-  ////max	65024,	32512,	16256,	127
-  ////min	32513,	16257,	128,	  0
-  //if (0 <= e.ticks && e.ticks <= 127)
-  //{
-  //  //no mask to set
-  //}
-  //else if (128 <= e.ticks && e.ticks <= 16256)
-  //{
-  //  timestamps[1] |= TIMESTAMP_MULTIPLICATOR_MASK;
-  //}
-  //else if (16257 <= e.ticks && e.ticks <= 32512)
-  //{
-  //  timestamps[2] |= TIMESTAMP_MULTIPLICATOR_MASK;
-  //  timestamps[1] |= TIMESTAMP_MULTIPLICATOR_MASK;
-  //}
-  //else if (32513 <= e.ticks && e.ticks <= 65024)
-  //{
-  //  timestamps[3] |= TIMESTAMP_MULTIPLICATOR_MASK;
-  //  timestamps[2] |= TIMESTAMP_MULTIPLICATOR_MASK;
-  //  timestamps[1] |= TIMESTAMP_MULTIPLICATOR_MASK;
-  //}
-
-  ////EDIT: always force a minimum of 2 characters for dumping timestamps
-  //timestamps[1] |= TIMESTAMP_MULTIPLICATOR_MASK;
-
-  ////dump e.ticks bits into their containers
-  //timestamps[0] |= (e.ticks & MASK_TIMESTAMP_1) >> 0;
-  //timestamps[1] |= (e.ticks & MASK_TIMESTAMP_2) >> 7;
-  //timestamps[2] |= (e.ticks & MASK_TIMESTAMP_3) >> 14;
-  //timestamps[3] |= (e.ticks & MASK_TIMESTAMP_4) >> 21;
-
-  ////fwrite ticks container
-  //for(int i=0; i<4; i++)
-  //{
-  //  if ((timestamps[i] | TIMESTAMP_MULTIPLICATOR_MASK) > 0)
-  //  {
-  //    //multiplicator bit set. Dump this container
-  //    writeSize += fwrite(&timestamps[i], 1, sizeof(timestamps[i]), f);
-  //  }
-  //}
-  writeSize += fwriteVariableLength(e.ticks, 2, f);
+  writeSize += fwriteVariableLength(tmp.ticks, 2, f);
 
   if (!isRunningStatus)
   {
