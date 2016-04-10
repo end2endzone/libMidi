@@ -1,0 +1,4 @@
+void play1second(int pin) {
+  tone(pin, 262, 999);
+  delay(1000);
+}
