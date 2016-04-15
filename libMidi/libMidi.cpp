@@ -12,6 +12,8 @@
 //      http://www.skytopia.com/project/articles/midi.html
 //      http://people.virginia.edu/~pdr4h/pitch-freq.html
 //      http://www.phy.mtu.edu/~suits/notefreqs.html
+//      http://stackoverflow.com/questions/5288593/how-to-convert-midi-timeline-into-the-actual-timeline-that-should-be-played/5297236#5297236
+//      http://www.lastrayofhope.co.uk/2009/12/23/midi-delta-time-ticks-to-seconds/2/
 //
 
 
@@ -40,11 +42,26 @@ static const EVENT_PITCH ALL_NOTES_OFF = (char)0x7B;
 typedef int8_t EVENT_VOLUME; //from 0 to 7F
 static const EVENT_VOLUME MIN_VOLUME = (char)0x00;
 static const EVENT_VOLUME MAX_VOLUME = (char)0x7F;
+
 typedef int8_t META_TYPE;
-static const META_TYPE META_SONG_NAME = (char)0x03;
-static const META_TYPE META_UNKNOWN = (char)0x51;
+static const META_TYPE META_SEQUENCE_NUMBER                = (char)0x00;
+static const META_TYPE META_TEXT_EVENT                     = (char)0x01;
+static const META_TYPE META_COPYRIGHT_NOTICE               = (char)0x02;
+static const META_TYPE META_SEQUENCE_OR_TRACK_NAME         = (char)0x03;
+static const META_TYPE META_INSTRUMENT_NAME                = (char)0x04;
+static const META_TYPE META_LYRIC_TEXT	                   = (char)0x05;
+static const META_TYPE META_MARKER_TEXT	                   = (char)0x06;
+static const META_TYPE META_CUE_POINT                      = (char)0x07;
+static const META_TYPE META_MIDI_CHANNEL_PREFIX_ASSIGNMENT = (char)0x20;
+static const META_TYPE META_END_OF_TRACK                   = (char)0x2F;
+static const META_TYPE META_TEMPO_SETTING                  = (char)0x51;
+static const META_TYPE META_SMPTE_OFFSET                   = (char)0x54;
+static const META_TYPE META_TIME_SIGNATURE                 = (char)0x58;
+static const META_TYPE META_KEY_SIGNATURE                  = (char)0x59;
+static const META_TYPE META_SEQUENCER_SPECIFIC_EVENT       = (char)0x7F;
 typedef int8_t META_SIZE;
 
+typedef uint32_t VAR_LENGTH;
 
 #pragma pack(push, 1) // exact fit - no padding
 struct MIDI_HEADER
@@ -62,18 +79,26 @@ struct TRACK_HEADER
 };
 struct NOTE_EVENT
 {
-  uint32_t ticks;
+  VAR_LENGTH ticks;
   EVENT_STATUS status;
   EVENT_PITCH pitch;
   EVENT_VOLUME volume;
 };
 struct META_EVENT
 {
-  EVENT_TIMESTAMP timestamp;
+  VAR_LENGTH ticks;
   EVENT_STATUS status;
   META_TYPE type;
-  META_SIZE size;
+  VAR_LENGTH size;
 };
+//struct META_TEMPO_EVENT
+//{
+//  VAR_LENGTH ticks;
+//  EVENT_STATUS status;
+//  META_TYPE type;
+//  int8_t unknown; //always 3
+//  uint64_t tempo; //6 bytes
+//};
 #pragma pack(pop) //back to whatever the previous packing mode was
 
 
@@ -456,10 +481,11 @@ void swap_endian(T& u)
 
 MidiFile::MidiFile()
 {
-  mTicksPerQuarterNote = 128;
+  mTicksPerQuarterNote = MidiFile::DEFAULT_TICKS_PER_QUARTER_NOTE;
+  mTempo = MidiFile::DEFAULT_TEMPO;
 }
 
-void MidiFile::addNote(unsigned short iFrequency, unsigned short iDurationMs)
+void MidiFile::addNote(uint16_t iFrequency, uint16_t iDurationMs)
 {
   NOTE n;
   n.frequency = iFrequency;
@@ -468,14 +494,20 @@ void MidiFile::addNote(unsigned short iFrequency, unsigned short iDurationMs)
   mNotes.push_back(n);
 }
 
-void MidiFile::setTicksPerQuarterNotes(unsigned short iTicks)
+void MidiFile::setTicksPerQuarterNote(uint16_t iTicks)
 {
   mTicksPerQuarterNote = iTicks;
 }
 
-void MidiFile::setBeatsPerMinutes(unsigned short iBpm)
+void MidiFile::setBeatsPerMinute(uint16_t iBpm)
 {
-  mTicksPerQuarterNote = 60000;
+  //BPM 2 tempo
+  mTempo = 1*MIN2USEC/((uint32_t)iBpm);
+}
+
+void MidiFile::setTempo(uint32_t iTempo)
+{
+  mTempo = iTempo;
 }
 
 void MidiFile::setName(const char * iName)
@@ -504,38 +536,66 @@ size_t fwriteevent(const NOTE_EVENT & e, bool isRunningStatus, FILE * f)
 {
   size_t writeSize = 0;
 
-  NOTE_EVENT tmp = e;
+  //NOTE_EVENT tmp = e;
   
-  writeSize += fwriteVariableLength(tmp.ticks, 2, f);
+  writeSize += fwriteVariableLength(e.ticks, 1, f);
 
   if (!isRunningStatus)
   {
-    swap_endian(tmp.status   );
-    writeSize += fwrite(&tmp.status, 1, sizeof(tmp.status), f);
+    //swap_endian(tmp.status   );
+    writeSize += fwrite(&e.status, 1, sizeof(e.status), f);
   }
 
-  swap_endian(tmp.pitch   );
-  writeSize += fwrite(&tmp.pitch, 1, sizeof(tmp.pitch), f);
+  //swap_endian(tmp.pitch   );
+  writeSize += fwrite(&e.pitch, 1, sizeof(e.pitch), f);
 
-  swap_endian(tmp.volume   );
-  writeSize += fwrite(&tmp.volume, 1, sizeof(tmp.volume), f);
+  //swap_endian(tmp.volume   );
+  writeSize += fwrite(&e.volume, 1, sizeof(e.volume), f);
 
   return writeSize;
 }
 size_t fswapwrite(const META_EVENT & e, FILE * f)
 {
-  META_EVENT tmp = e;
-  swap_endian(tmp.timestamp);
-  swap_endian(tmp.status   );
-  swap_endian(tmp.type     );
-  swap_endian(tmp.size     );
-  return fwrite(&tmp, 1, sizeof(tmp), f);
+  size_t writeSize = 0;
+
+  //META_EVENT tmp = e;
+
+  writeSize += fwriteVariableLength(e.ticks, 1, f);
+  writeSize += fwrite(&e.status, 1, sizeof(e.status), f);
+  writeSize += fwrite(&e.type, 1, sizeof(e.type), f);
+  writeSize += fwriteVariableLength(e.size, 1, f);
+
+  return writeSize;
 }
+//size_t fswapwrite(const META_TEMPO_EVENT & e, FILE * f)
+//{
+//  size_t writeSize = 0;
+//
+//  writeSize += fwriteVariableLength(e.ticks, 1, f);
+//  writeSize += fwrite(&e.status, 1, sizeof(e.status), f);
+//  writeSize += fwrite(&e.type, 1, sizeof(e.type), f);
+//  writeSize += fwrite(&e.unknown, 1, sizeof(e.unknown), f);
+//  writeSize += fwrite(&e.tempo, 1, 6, f);
+//
+//  return writeSize;
+//}
 size_t fswapwrite(const HEADER_ID & id, FILE * f)
 {
   HEADER_ID tmp = id;
   swap_endian(tmp);
   return fwrite(&tmp, 1, sizeof(tmp), f);
+}
+
+//void computeAutoTempo()
+//{
+//  mTempo = 0x0a2c2b;
+//}
+
+uint16_t MidiFile::computeTicks(uint16_t iDurationMs)
+{
+  //formula: noteticks/mTicksPerQuarterNote*tempo/1000=notedurationMs
+  uint32_t noteticks = (1000*iDurationMs*mTicksPerQuarterNote)/mTempo;
+  return (uint16_t)noteticks;
 }
 
 bool MidiFile::save(const char * iFile)
@@ -564,59 +624,85 @@ bool MidiFile::save(const char * iFile)
   if (mName != "")
   {
     META_EVENT e;
-    e.timestamp = 0;
+    e.ticks = 0;
     e.status = EVENT_META;
-    e.type = META_SONG_NAME;
+    e.type = META_SEQUENCE_OR_TRACK_NAME;
     e.size = mName.size();
 
     //dump
-    fswapwrite(e, fout);
-    fwrite(mName.c_str(), 1, e.size, fout);
-    
-    //update track length
-    t.length += e.size;
+    t.length += fswapwrite(e, fout);
+    t.length += fwrite(mName.c_str(), 1, e.size, fout);
   }
 
-  //calculate duration of the note in ticks
-  //simulate 0 first, then 128 for all subsequent notes
-  static int noteTicks = 0;
+  //force a TEMPO
+  {
+    META_EVENT e;
+    e.ticks = 0;
+    e.status = EVENT_META;
+    e.type = META_TEMPO_SETTING;
+    e.size = 3;
 
-  //unsigned short previousNoteDurationMs = 0;
+    //dump
+    t.length += fswapwrite(e, fout);
+
+    //dump value
+    uint32_t tempo = mTempo;
+    swap_endian(tempo);
+    char* tempoOut = (char*)&tempo;
+    t.length += fwrite(&tempoOut[1], 1, 3, fout);
+
+    //Next to all TEMPO EVENT is the following 3 bytes which are still unknown
+    static unsigned char buffer[] = {0x00, 0xC0, 0x51};
+    t.length += fwrite(buffer, 1, sizeof(buffer), fout);
+  }
+
+  uint16_t previousNoteTicks = 0;
   for(size_t i=0; i<mNotes.size(); i++)
   {
     const NOTE & n = mNotes[i];
 
     //build an event for the note
-    if (i == 0)
+    //if (i == 0)
+    //{
+    //  NOTE_EVENT e;
+    //  e.ticks = noteTicks;
+    //  e.status = NOTE_ON_CHANNEL_0;
+    //  e.pitch = findMidiPitchFromFrequency(n.frequency);
+    //  e.volume = 0x64;
+
+    //  //dump
+    //  t.length += fwriteevent(e, false, fout);
+    //}
+    //else
+    //{
+    //  NOTE_EVENT e;
+    //  e.ticks = noteTicks;
+    //  e.pitch = findMidiPitchFromFrequency(n.frequency);
+    //  e.volume = 0x64;
+
+    //  //dump
+    //  t.length += fwriteevent(e, true, fout);
+    //}
     {
       NOTE_EVENT e;
-      e.ticks = noteTicks;
+      e.ticks = previousNoteTicks;
       e.status = NOTE_ON_CHANNEL_0;
       e.pitch = findMidiPitchFromFrequency(n.frequency);
-      e.volume = 0x60;
+      e.volume = 0x64;
 
       //dump
-      t.length += fwriteevent(e, false, fout);
-    }
-    else
-    {
-      NOTE_EVENT e;
-      e.ticks = noteTicks;
-      e.pitch = findMidiPitchFromFrequency(n.frequency);
-      e.volume = 0x60;
-
-      //dump
-      t.length += fwriteevent(e, true, fout);
+      bool isRunningStatus = (i!=0);
+      t.length += fwriteevent(e, isRunningStatus, fout);
     }
 
     //remember previous note duration
-    noteTicks = 128;
+    previousNoteTicks = computeTicks(n.durationMs);
   }
 
   //silence all notes
   {
     NOTE_EVENT e;
-    e.ticks = noteTicks;
+    e.ticks = previousNoteTicks;
     e.status = CONTROLCHANGE_B_CHANNEL_0;
     e.pitch = ALL_NOTES_OFF;
     e.volume = MIN_VOLUME;

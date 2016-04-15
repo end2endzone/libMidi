@@ -20,7 +20,7 @@ inline size_t getVariableLengthMask(int iIndex)
 }
 
 template <typename T>
-size_t fwriteVariableLength(const T & iValue, int iMinOutputSize, FILE * f)
+size_t fwriteVariableLength(const T & iValue, size_t iMinOutputSize, FILE * f)
 {
   size_t writeSize = 0;
 
