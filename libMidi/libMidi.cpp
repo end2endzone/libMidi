@@ -91,14 +91,6 @@ struct META_EVENT
   META_TYPE type;
   VAR_LENGTH size;
 };
-//struct META_TEMPO_EVENT
-//{
-//  VAR_LENGTH ticks;
-//  EVENT_STATUS status;
-//  META_TYPE type;
-//  int8_t unknown; //always 3
-//  uint64_t tempo; //6 bytes
-//};
 #pragma pack(pop) //back to whatever the previous packing mode was
 
 
@@ -536,20 +528,12 @@ size_t fwriteevent(const NOTE_EVENT & e, bool isRunningStatus, FILE * f)
 {
   size_t writeSize = 0;
 
-  //NOTE_EVENT tmp = e;
-  
   writeSize += fwriteVariableLength(e.ticks, 1, f);
-
   if (!isRunningStatus)
   {
-    //swap_endian(tmp.status   );
     writeSize += fwrite(&e.status, 1, sizeof(e.status), f);
   }
-
-  //swap_endian(tmp.pitch   );
   writeSize += fwrite(&e.pitch, 1, sizeof(e.pitch), f);
-
-  //swap_endian(tmp.volume   );
   writeSize += fwrite(&e.volume, 1, sizeof(e.volume), f);
 
   return writeSize;
@@ -558,8 +542,6 @@ size_t fswapwrite(const META_EVENT & e, FILE * f)
 {
   size_t writeSize = 0;
 
-  //META_EVENT tmp = e;
-
   writeSize += fwriteVariableLength(e.ticks, 1, f);
   writeSize += fwrite(&e.status, 1, sizeof(e.status), f);
   writeSize += fwrite(&e.type, 1, sizeof(e.type), f);
@@ -567,18 +549,6 @@ size_t fswapwrite(const META_EVENT & e, FILE * f)
 
   return writeSize;
 }
-//size_t fswapwrite(const META_TEMPO_EVENT & e, FILE * f)
-//{
-//  size_t writeSize = 0;
-//
-//  writeSize += fwriteVariableLength(e.ticks, 1, f);
-//  writeSize += fwrite(&e.status, 1, sizeof(e.status), f);
-//  writeSize += fwrite(&e.type, 1, sizeof(e.type), f);
-//  writeSize += fwrite(&e.unknown, 1, sizeof(e.unknown), f);
-//  writeSize += fwrite(&e.tempo, 1, 6, f);
-//
-//  return writeSize;
-//}
 size_t fswapwrite(const HEADER_ID & id, FILE * f)
 {
   HEADER_ID tmp = id;
@@ -662,27 +632,6 @@ bool MidiFile::save(const char * iFile)
     const NOTE & n = mNotes[i];
 
     //build an event for the note
-    //if (i == 0)
-    //{
-    //  NOTE_EVENT e;
-    //  e.ticks = noteTicks;
-    //  e.status = NOTE_ON_CHANNEL_0;
-    //  e.pitch = findMidiPitchFromFrequency(n.frequency);
-    //  e.volume = 0x64;
-
-    //  //dump
-    //  t.length += fwriteevent(e, false, fout);
-    //}
-    //else
-    //{
-    //  NOTE_EVENT e;
-    //  e.ticks = noteTicks;
-    //  e.pitch = findMidiPitchFromFrequency(n.frequency);
-    //  e.volume = 0x64;
-
-    //  //dump
-    //  t.length += fwriteevent(e, true, fout);
-    //}
     {
       NOTE_EVENT e;
       e.ticks = previousNoteTicks;
