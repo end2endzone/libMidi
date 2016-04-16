@@ -71,16 +71,20 @@ void TestMidiFile::TearDown()
 
 TEST_F(TestMidiFile, testCDE)
 {
+  static const char * outputFile = "testCDE.output.mid";
+
   MidiFile f;
   f.addNote(262, 100); //C4
   f.addNote(294, 100); //D4
   f.addNote(330, 100); //E4
-  bool saved = f.save("testCDE.output.mid");
+  bool saved = f.save(outputFile);
   ASSERT_TRUE(saved);
 }
 
 TEST_F(TestMidiFile, testMario1Up)
 {
+  static const char * outputFile = "testMario1Up.output.mid";
+
   MidiFile f;
   f.setName("mario1up");
   f.addNote(1319,125);
@@ -89,18 +93,43 @@ TEST_F(TestMidiFile, testMario1Up)
   f.addNote(2093,125);
   f.addNote(2349,125);
   f.addNote(3136,125);
-  bool saved = f.save("testMario1Up.output.mid");
+  bool saved = f.save(outputFile);
   ASSERT_TRUE(saved);
 }
 
 TEST_F(TestMidiFile, test1Second)
 {
+  static const char * outputFile = "test1Second.output.mid";
+
   MidiFile f;
   f.setBeatsPerMinute(90);
   f.setName("1second");
-  f.addNote(131 /*C3 instead of C4 which is 262*/,1000);
-  bool saved = f.save("test1Second.output.mid");
+  f.addNote(131, 1000); // C3 instead of C4 which is 262
+  bool saved = f.save(outputFile);
   ASSERT_TRUE(saved);
+}
+
+TEST_F(TestMidiFile, testBuzzer)
+{
+  static const char * outputFile = "testBuzzer.output.mid";
+  gTestHelper & helper = gTestHelper::getInstance();
+
+  MidiFile f;
+  f.setMidiType(MidiFile::MIDI_TYPE_0);
+  f.setTempo(0x051615);
+  f.setName("buzzer");
+  f.setVolume(0x64);
+  MidiFile::TRACK_ENDING_PREFERENCE preferences = (MidiFile::TRACK_ENDING_PREFERENCE)(MidiFile::STOP_PREVIOUS_NOTE | MidiFile::TRACK_FOOTER_TICKS);
+  f.setTrackEndingPreference(preferences);
+  for(int i=0; i<10; i++)
+  {
+    f.addNote(131, 125); // C3 instead of C4 which is 262
+    f.addDelay(125);
+  }
+  bool saved = f.save(outputFile);
+  ASSERT_TRUE(saved);
+
+  ASSERT_TRUE( helper.isFileEquals(outputFile, "testFiles\\buzzer.mid") );
 }
 
 TEST_F(TestMidiFile, testVariableLength)
