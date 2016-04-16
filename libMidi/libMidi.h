@@ -30,6 +30,8 @@
 // 04/15/2016 v1.0 - Initial release.
 //
 
+#ifndef LIBMIDI_H
+#define LIBMIDI_H
 
 // The following ifdef block is the standard way of creating macros which make exporting 
 // from a DLL simpler. All files within this DLL are compiled with the LIBMIDI_EXPORTS
@@ -37,17 +39,20 @@
 // that uses this DLL. This way any other project whose source files include this file see 
 // LIBMIDI_API functions as being imported from a DLL, whereas this DLL sees symbols
 // defined with this macro as being exported.
+#ifdef _WIN32
 #ifdef LIBMIDI_EXPORTS
 #define LIBMIDI_API __declspec(dllexport)
 #else
 #define LIBMIDI_API __declspec(dllimport)
+#endif
+#else
+#define LIBMIDI_API
 #endif
 
 #include <vector>
 #include <string>
 #include "miditypes.h"
 
-// This class is exported from the libMidi.dll
 class LIBMIDI_API MidiFile {
 public:
 	MidiFile(void);
@@ -56,8 +61,6 @@ public:
   void setBeatsPerMinute(uint16_t iBpm);
   void setTempo(uint32_t iTempo); //usec per quarter note
   void setName(const char * iName);
-  //void computeAutoTempo();
-  uint16_t computeTicks(uint16_t iDurationMs);
   bool save(const char * iFile);
 
 public:
@@ -65,6 +68,9 @@ public:
   static const uint32_t DEFAULT_TEMPO = 500000;
   static const uint32_t DEFAULT_TICKS_PER_QUARTER_NOTE = 480;
   static const uint32_t MIN2USEC = 60*1000*1000;
+
+private:
+  uint16_t computeTicks(uint16_t iDurationMs);
 
 private:
   struct NOTE
@@ -78,3 +84,5 @@ private:
   std::string mName;
   NoteList mNotes;
 };
+
+#endif //LIBMIDI_H

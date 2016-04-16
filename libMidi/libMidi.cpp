@@ -31,14 +31,12 @@
 //
 
 
-// libMidi.cpp : Defines the exported functions for the DLL application.
-//
-
-
-
 //
 // Description:
-//   Library for building a simple songle channel MIDI file.
+//   Library for building a simple song based on 
+//   single channel MIDI file.
+//
+// References:
 //   Based on the following:
 //      http://kevinboone.net/javamidi.html
 //      http://www.ccarh.org/courses/253/handout/smf/
@@ -48,7 +46,6 @@
 //      http://stackoverflow.com/questions/5288593/how-to-convert-midi-timeline-into-the-actual-timeline-that-should-be-played/5297236#5297236
 //      http://www.lastrayofhope.co.uk/2009/12/23/midi-delta-time-ticks-to-seconds/2/
 //
-
 
 #include "libMidi.h"
 #include "miditypes.h"
@@ -588,11 +585,6 @@ size_t fswapwrite(const HEADER_ID & id, FILE * f)
   swap_endian(tmp);
   return fwrite(&tmp, 1, sizeof(tmp), f);
 }
-
-//void computeAutoTempo()
-//{
-//  mTempo = 0x0a2c2b;
-//}
 
 uint16_t MidiFile::computeTicks(uint16_t iDurationMs)
 {
