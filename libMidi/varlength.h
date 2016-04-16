@@ -68,7 +68,6 @@ size_t fwriteVariableLength(const T & iValue, size_t iMinOutputSize, FILE * f)
   memset(outputBuffer, 0, maxOutputSize);
   size_t outputSize = 1; //number of characters to output
 
-  unsigned char * inputBuffer = (unsigned char *)&copy;
   for(size_t i=0; i<inputSize; i++)
   {
     //move the next 7 bits from inputBuffer to outputBuffer
