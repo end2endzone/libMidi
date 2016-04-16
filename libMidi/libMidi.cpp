@@ -54,21 +54,22 @@
 typedef uint32_t HEADER_ID;
 static const HEADER_ID MIDI_FILE_ID = 0x4d546864; //"MThd"
 static const HEADER_ID MIDI_TRACK_HEADER_ID = 0x4d54726b; //"MTrk"
-static const HEADER_ID MIDI_TRACK_FOOTER_ID = 0x00ff2f00;
 
-typedef uint16_t MIDI_TYPE;
-static const MIDI_TYPE MIDI_TYPE_0 = 0;
-static const MIDI_TYPE MIDI_TYPE_1 = 1;
+typedef uint16_t HEADER_MIDI_TYPE;
 
 //events handling
 typedef int8_t EVENT_TIMESTAMP;
 static const EVENT_TIMESTAMP TIMESTAMP_MULTIPLICATOR_MASK = (char)0x80;
+
 typedef int8_t EVENT_STATUS;
 static const EVENT_STATUS NOTE_ON_CHANNEL_0 = (char)0x90;
+static const EVENT_STATUS NOTE_OFF_CHANNEL_0 = (char)0x80;
 static const EVENT_STATUS CONTROLCHANGE_B_CHANNEL_0 = (char)0xB0;
 static const EVENT_STATUS EVENT_META = (char)0xFF;
+
 typedef int8_t EVENT_PITCH; //note code
 static const EVENT_PITCH ALL_NOTES_OFF = (char)0x7B;
+
 typedef int8_t EVENT_VOLUME; //from 0 to 7F
 static const EVENT_VOLUME MIN_VOLUME = (char)0x00;
 static const EVENT_VOLUME MAX_VOLUME = (char)0x7F;
@@ -98,7 +99,7 @@ struct MIDI_HEADER
 {
   HEADER_ID id; //see DEFAULT_FILE_HEADER
   uint32_t length;
-  MIDI_TYPE type;
+  HEADER_MIDI_TYPE type;
   uint16_t numTracks;
   uint16_t ticksPerQuarterNote;
 };
@@ -122,7 +123,6 @@ struct META_EVENT
   VAR_LENGTH size;
 };
 #pragma pack(pop) //back to whatever the previous packing mode was
-
 
 
 
@@ -505,12 +505,25 @@ MidiFile::MidiFile()
 {
   mTicksPerQuarterNote = MidiFile::DEFAULT_TICKS_PER_QUARTER_NOTE;
   mTempo = MidiFile::DEFAULT_TEMPO;
+  mVolume = 0x7f;
+  mTrackEndingPreference = STOP_PREVIOUS_NOTE;
+  mType = MIDI_TYPE_0;
 }
 
 void MidiFile::addNote(uint16_t iFrequency, uint16_t iDurationMs)
 {
   NOTE n;
   n.frequency = iFrequency;
+  n.durationMs = iDurationMs;
+  n.volume = mVolume;
+
+  mNotes.push_back(n);
+}
+
+void MidiFile::addDelay(uint16_t iDurationMs)
+{
+  NOTE n;
+  n.frequency = 0;
   n.durationMs = iDurationMs;
 
   mNotes.push_back(n);
@@ -535,6 +548,21 @@ void MidiFile::setTempo(uint32_t iTempo)
 void MidiFile::setName(const char * iName)
 {
   mName = iName;
+}
+
+void MidiFile::setVolume(int8_t iVolume)
+{
+  mVolume = iVolume;
+}
+
+void MidiFile::setTrackEndingPreference(TRACK_ENDING_PREFERENCE iTrackEndingPreference)
+{
+  mTrackEndingPreference = iTrackEndingPreference;
+}
+
+void MidiFile::setMidiType(MIDI_TYPE iType)
+{
+  mType = iType;
 }
 
 size_t fswapwrite(const MIDI_HEADER & iHeader, FILE * f)
@@ -598,7 +626,7 @@ bool MidiFile::save(const char * iFile)
   MIDI_HEADER h;
   h.id = MIDI_FILE_ID;
   h.length = 6;
-  h.type = MIDI_TYPE_1;
+  h.type = (HEADER_MIDI_TYPE)mType;
   h.numTracks = 1;
   h.ticksPerQuarterNote = mTicksPerQuarterNote;
 
@@ -610,10 +638,10 @@ bool MidiFile::save(const char * iFile)
   if (!fout)
     return false;
 
-  //write header
+  //write midi file header
   fswapwrite(h, fout);
 
-  //write header
+  //write track header
   fswapwrite(t, fout);
 
   if (mName != "")
@@ -652,29 +680,92 @@ bool MidiFile::save(const char * iFile)
   }
 
   uint16_t previousNoteTicks = 0;
+  EVENT_PITCH previousPitch = 0;
+  EVENT_STATUS previousStatus = 0;
   for(size_t i=0; i<mNotes.size(); i++)
   {
     const NOTE & n = mNotes[i];
 
     //build an event for the note
+    if (n.frequency)
     {
       NOTE_EVENT e;
       e.ticks = previousNoteTicks;
       e.status = NOTE_ON_CHANNEL_0;
       e.pitch = findMidiPitchFromFrequency(n.frequency);
-      e.volume = 0x64;
+      e.volume = mVolume;
 
       //dump
-      bool isRunningStatus = (i!=0);
+      bool isRunningStatus = (previousStatus == e.status);
       t.length += fwriteevent(e, isRunningStatus, fout);
+
+      //remember status
+      previousStatus = e.status;
+      //lastAudibleNote = &n;
+      previousPitch = e.pitch;
+    }
+    else
+    {
+      //silenced delay
+
+      if (i > 0)
+      {
+        //stop previous note
+        const NOTE & previous = mNotes[i-1];
+
+        NOTE_EVENT e;
+        e.ticks = previousNoteTicks;
+        e.status = NOTE_OFF_CHANNEL_0;
+        e.pitch = findMidiPitchFromFrequency(previous.frequency);
+        e.volume = mVolume;
+
+        //dump
+        bool isRunningStatus = (previousStatus == e.status);
+        t.length += fwriteevent(e, isRunningStatus, fout);
+
+        //remember status
+        previousStatus = e.status;
+        previousPitch = e.pitch;
+      }
+      else
+      {
+        //that is the first note.
+        //there is no need to turn off the previous note
+      }
     }
 
     //remember previous note duration
     previousNoteTicks = computeTicks(n.durationMs);
   }
 
-  //silence all notes
+  //no more notes to play
+  //end the played note
+  if (  (mTrackEndingPreference & STOP_PREVIOUS_NOTE) > 0 &&
+        /*lastAudibleNote != NULL*/ previousPitch != 0)
   {
+    const NOTE & lastNote = mNotes[mNotes.size()-1];
+    if (lastNote.frequency == 0)
+    {
+      //last note is a silent note.
+      //there is no note to stop
+    }
+    else
+    {
+      //stopping the note
+      NOTE_EVENT e;
+      e.ticks = previousNoteTicks;
+      e.status = NOTE_OFF_CHANNEL_0;
+      e.pitch = previousPitch; //findMidiPitchFromFrequency(lastAudibleNote->frequency);
+      e.volume = mVolume;
+
+      //dump
+      bool isRunningStatus = (previousStatus == e.status);
+      t.length += fwriteevent(e, isRunningStatus, fout);
+    }
+  }
+  else if ((mTrackEndingPreference & STOP_ALL_NOTES) > 0)
+  {
+    //silence all notes
     NOTE_EVENT e;
     e.ticks = previousNoteTicks;
     e.status = CONTROLCHANGE_B_CHANNEL_0;
@@ -686,10 +777,23 @@ bool MidiFile::save(const char * iFile)
   }
 
   //add track footer
-  fswapwrite(MIDI_TRACK_FOOTER_ID, fout);
+  //t.length += fswapwrite(MIDI_TRACK_FOOTER_ID, fout);
+  {
+    META_EVENT e;
+    if ((mTrackEndingPreference & TRACK_FOOTER_TICKS) > 0)
+      e.ticks = previousNoteTicks;
+    else
+      e.ticks = 0;
+    e.status = EVENT_META;
+    e.type = META_END_OF_TRACK;
+    e.size = 0;
+
+    //dump
+    t.length += fswapwrite(e, fout);
+  }
 
   //update track length
-  t.length += sizeof(MIDI_TRACK_FOOTER_ID);
+  //t.length += sizeof(MIDI_TRACK_FOOTER_ID);
 
   //write FILE & TRACK headers again
   fseek(fout, 0, SEEK_SET);

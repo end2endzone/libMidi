@@ -55,12 +55,19 @@
 
 class LIBMIDI_API MidiFile {
 public:
+  enum TRACK_ENDING_PREFERENCE;
+  enum MIDI_TYPE;
+
 	MidiFile(void);
   void addNote(uint16_t iFrequency, uint16_t iDurationMs);
+  void addDelay(uint16_t iDurationMs);
   void setTicksPerQuarterNote(uint16_t iTicks);
   void setBeatsPerMinute(uint16_t iBpm);
   void setTempo(uint32_t iTempo); //usec per quarter note
   void setName(const char * iName);
+  void setVolume(int8_t iVolume);
+  void setTrackEndingPreference(TRACK_ENDING_PREFERENCE iTrackEndingPreference);
+  void setMidiType(MIDI_TYPE iType);
   bool save(const char * iFile);
 
 public:
@@ -68,6 +75,17 @@ public:
   static const uint32_t DEFAULT_TEMPO = 500000;
   static const uint32_t DEFAULT_TICKS_PER_QUARTER_NOTE = 480;
   static const uint32_t MIN2USEC = 60*1000*1000;
+  enum TRACK_ENDING_PREFERENCE
+  {
+    STOP_PREVIOUS_NOTE = 1,
+    STOP_ALL_NOTES = 2,
+    TRACK_FOOTER_TICKS = 4,
+  };
+  enum MIDI_TYPE
+  {
+    MIDI_TYPE_0 = 0,
+    MIDI_TYPE_1 = 1
+  };
 
 private:
   uint16_t computeTicks(uint16_t iDurationMs);
@@ -77,12 +95,16 @@ private:
   {
     uint16_t frequency;
     uint16_t durationMs;
+    int8_t volume;
   };
   typedef std::vector<NOTE> NoteList;
   uint16_t mTicksPerQuarterNote;
   uint32_t mTempo; //usec per quarter note
   std::string mName;
   NoteList mNotes;
+  int8_t mVolume; //from 0x00 to 0x7f
+  TRACK_ENDING_PREFERENCE mTrackEndingPreference;
+  MIDI_TYPE mType;
 };
 
 #endif //LIBMIDI_H
