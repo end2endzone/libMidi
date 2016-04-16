@@ -1,0 +1,32 @@
+void playBuzzer(int pin) {
+  tone(pin, 262, 124);
+  delay(125);
+  delay(124);
+  tone(pin, 262, 124);
+  delay(125);
+  delay(124);
+  tone(pin, 262, 124);
+  delay(125);
+  delay(124);
+  tone(pin, 262, 124);
+  delay(125);
+  delay(124);
+  tone(pin, 262, 124);
+  delay(125);
+  delay(124);
+  tone(pin, 262, 124);
+  delay(125);
+  delay(124);
+  tone(pin, 262, 124);
+  delay(125);
+  delay(124);
+  tone(pin, 262, 124);
+  delay(125);
+  delay(124);
+  tone(pin, 262, 124);
+  delay(125);
+  delay(124);
+  tone(pin, 262, 124);
+  delay(125);
+  delay(124);
+}
