@@ -58,39 +58,35 @@ static const HEADER_ID MIDI_TRACK_HEADER_ID = 0x4d54726b; //"MTrk"
 typedef uint16_t HEADER_MIDI_TYPE;
 
 //events handling
-typedef int8_t EVENT_TIMESTAMP;
-static const EVENT_TIMESTAMP TIMESTAMP_MULTIPLICATOR_MASK = (char)0x80;
-
-typedef int8_t EVENT_STATUS;
-static const EVENT_STATUS NOTE_ON_CHANNEL_0 = (char)0x90;
-static const EVENT_STATUS NOTE_OFF_CHANNEL_0 = (char)0x80;
-static const EVENT_STATUS CONTROLCHANGE_B_CHANNEL_0 = (char)0xB0;
-static const EVENT_STATUS EVENT_META = (char)0xFF;
+typedef uint8_t EVENT_STATUS;
+static const EVENT_STATUS NOTE_ON_CHANNEL_0         = (EVENT_STATUS)0x90;
+static const EVENT_STATUS NOTE_OFF_CHANNEL_0        = (EVENT_STATUS)0x80;
+static const EVENT_STATUS CONTROLCHANGE_B_CHANNEL_0 = (EVENT_STATUS)0xB0;
+static const EVENT_STATUS EVENT_META                = (EVENT_STATUS)0xFF;
 
 typedef int8_t EVENT_PITCH; //note code
-static const EVENT_PITCH ALL_NOTES_OFF = (char)0x7B;
+static const EVENT_PITCH ALL_NOTES_OFF = (EVENT_PITCH)0x7B;
 
 typedef int8_t EVENT_VOLUME; //from 0 to 7F
-static const EVENT_VOLUME MIN_VOLUME = (char)0x00;
-static const EVENT_VOLUME MAX_VOLUME = (char)0x7F;
+static const EVENT_VOLUME MIN_VOLUME = (EVENT_VOLUME)0x00;
+static const EVENT_VOLUME MAX_VOLUME = (EVENT_VOLUME)0x7F;
 
 typedef int8_t META_TYPE;
-static const META_TYPE META_SEQUENCE_NUMBER                = (char)0x00;
-static const META_TYPE META_TEXT_EVENT                     = (char)0x01;
-static const META_TYPE META_COPYRIGHT_NOTICE               = (char)0x02;
-static const META_TYPE META_SEQUENCE_OR_TRACK_NAME         = (char)0x03;
-static const META_TYPE META_INSTRUMENT_NAME                = (char)0x04;
-static const META_TYPE META_LYRIC_TEXT	                   = (char)0x05;
-static const META_TYPE META_MARKER_TEXT	                   = (char)0x06;
-static const META_TYPE META_CUE_POINT                      = (char)0x07;
-static const META_TYPE META_MIDI_CHANNEL_PREFIX_ASSIGNMENT = (char)0x20;
-static const META_TYPE META_END_OF_TRACK                   = (char)0x2F;
-static const META_TYPE META_TEMPO_SETTING                  = (char)0x51;
-static const META_TYPE META_SMPTE_OFFSET                   = (char)0x54;
-static const META_TYPE META_TIME_SIGNATURE                 = (char)0x58;
-static const META_TYPE META_KEY_SIGNATURE                  = (char)0x59;
-static const META_TYPE META_SEQUENCER_SPECIFIC_EVENT       = (char)0x7F;
-typedef int8_t META_SIZE;
+static const META_TYPE META_SEQUENCE_NUMBER                = (META_TYPE)0x00;
+static const META_TYPE META_TEXT_EVENT                     = (META_TYPE)0x01;
+static const META_TYPE META_COPYRIGHT_NOTICE               = (META_TYPE)0x02;
+static const META_TYPE META_SEQUENCE_OR_TRACK_NAME         = (META_TYPE)0x03;
+static const META_TYPE META_INSTRUMENT_NAME                = (META_TYPE)0x04;
+static const META_TYPE META_LYRIC_TEXT	                   = (META_TYPE)0x05;
+static const META_TYPE META_MARKER_TEXT	                   = (META_TYPE)0x06;
+static const META_TYPE META_CUE_POINT                      = (META_TYPE)0x07;
+static const META_TYPE META_MIDI_CHANNEL_PREFIX_ASSIGNMENT = (META_TYPE)0x20;
+static const META_TYPE META_END_OF_TRACK                   = (META_TYPE)0x2F;
+static const META_TYPE META_TEMPO_SETTING                  = (META_TYPE)0x51;
+static const META_TYPE META_SMPTE_OFFSET                   = (META_TYPE)0x54;
+static const META_TYPE META_TIME_SIGNATURE                 = (META_TYPE)0x58;
+static const META_TYPE META_KEY_SIGNATURE                  = (META_TYPE)0x59;
+static const META_TYPE META_SEQUENCER_SPECIFIC_EVENT       = (META_TYPE)0x7F;
 
 typedef uint32_t VAR_LENGTH;
 
@@ -506,7 +502,7 @@ MidiFile::MidiFile()
   mTicksPerQuarterNote = MidiFile::DEFAULT_TICKS_PER_QUARTER_NOTE;
   mTempo = MidiFile::DEFAULT_TEMPO;
   mVolume = 0x7f;
-  mTrackEndingPreference = STOP_PREVIOUS_NOTE;
+  mTrackEndingPreference = (TRACK_ENDING_PREFERENCE)(STOP_PREVIOUS_NOTE | TRACK_FOOTER_TICKS);
   mType = MIDI_TYPE_0;
 }
 
@@ -553,6 +549,10 @@ void MidiFile::setName(const char * iName)
 void MidiFile::setVolume(int8_t iVolume)
 {
   mVolume = iVolume;
+  if (mVolume < MIN_VOLUME)
+    mVolume = MIN_VOLUME;
+  if (mVolume > MAX_VOLUME)
+    mVolume = MAX_VOLUME;
 }
 
 void MidiFile::setTrackEndingPreference(TRACK_ENDING_PREFERENCE iTrackEndingPreference)
@@ -623,26 +623,27 @@ uint16_t MidiFile::computeTicks(uint16_t iDurationMs)
 
 bool MidiFile::save(const char * iFile)
 {
-  MIDI_HEADER h;
-  h.id = MIDI_FILE_ID;
-  h.length = 6;
-  h.type = (HEADER_MIDI_TYPE)mType;
-  h.numTracks = 1;
-  h.ticksPerQuarterNote = mTicksPerQuarterNote;
+  MIDI_HEADER header;
+  header.id = MIDI_FILE_ID;
+  header.length = 6;
+  header.type = (HEADER_MIDI_TYPE)mType;
+  header.numTracks = 1;
+  header.ticksPerQuarterNote = mTicksPerQuarterNote;
 
-  TRACK_HEADER t;
-  t.id = MIDI_TRACK_HEADER_ID;
-  t.length = 0; //must be computed as we write data. The value will be written again once all the file is generated. ~4*mNotes.size() + 4 /*NoteStop*/ + sizeof(MIDI_TRACK_FOOTER_ID);
+  TRACK_HEADER track;
+  track.id = MIDI_TRACK_HEADER_ID;
+  track.length = 0; //must be computed as we write data. The value will be written again once all the file is generated.
 
   FILE * fout = fopen(iFile, "wb");
   if (!fout)
     return false;
 
   //write midi file header
-  fswapwrite(h, fout);
+  fswapwrite(header, fout);
 
   //write track header
-  fswapwrite(t, fout);
+  long trackFileOffset = ftell(fout);
+  fswapwrite(track, fout);
 
   if (mName != "")
   {
@@ -653,8 +654,8 @@ bool MidiFile::save(const char * iFile)
     e.size = mName.size();
 
     //dump
-    t.length += fswapwrite(e, fout);
-    t.length += fwrite(mName.c_str(), 1, e.size, fout);
+    track.length += fswapwrite(e, fout);
+    track.length += fwrite(mName.c_str(), 1, e.size, fout);
   }
 
   //force a TEMPO
@@ -666,17 +667,17 @@ bool MidiFile::save(const char * iFile)
     e.size = 3;
 
     //dump
-    t.length += fswapwrite(e, fout);
+    track.length += fswapwrite(e, fout);
 
     //dump value
     uint32_t tempo = mTempo;
     swap_endian(tempo);
     char* tempoOut = (char*)&tempo;
-    t.length += fwrite(&tempoOut[1], 1, 3, fout);
+    track.length += fwrite(&tempoOut[1], 1, 3, fout);
 
     //Next to all TEMPO EVENT is the following 3 bytes which are still unknown
     static unsigned char buffer[] = {0x00, 0xC0, 0x51};
-    t.length += fwrite(buffer, 1, sizeof(buffer), fout);
+    track.length += fwrite(buffer, 1, sizeof(buffer), fout);
   }
 
   uint16_t previousNoteTicks = 0;
@@ -697,7 +698,7 @@ bool MidiFile::save(const char * iFile)
 
       //dump
       bool isRunningStatus = (previousStatus == e.status);
-      t.length += fwriteevent(e, isRunningStatus, fout);
+      track.length += fwriteevent(e, isRunningStatus, fout);
 
       //remember status
       previousStatus = e.status;
@@ -721,7 +722,7 @@ bool MidiFile::save(const char * iFile)
 
         //dump
         bool isRunningStatus = (previousStatus == e.status);
-        t.length += fwriteevent(e, isRunningStatus, fout);
+        track.length += fwriteevent(e, isRunningStatus, fout);
 
         //remember status
         previousStatus = e.status;
@@ -740,8 +741,7 @@ bool MidiFile::save(const char * iFile)
 
   //no more notes to play
   //end the played note
-  if (  (mTrackEndingPreference & STOP_PREVIOUS_NOTE) > 0 &&
-        /*lastAudibleNote != NULL*/ previousPitch != 0)
+  if ( (mTrackEndingPreference & STOP_PREVIOUS_NOTE) > 0 && previousPitch != 0 )
   {
     const NOTE & lastNote = mNotes[mNotes.size()-1];
     if (lastNote.frequency == 0)
@@ -755,12 +755,12 @@ bool MidiFile::save(const char * iFile)
       NOTE_EVENT e;
       e.ticks = previousNoteTicks;
       e.status = NOTE_OFF_CHANNEL_0;
-      e.pitch = previousPitch; //findMidiPitchFromFrequency(lastAudibleNote->frequency);
+      e.pitch = previousPitch;
       e.volume = mVolume;
 
       //dump
       bool isRunningStatus = (previousStatus == e.status);
-      t.length += fwriteevent(e, isRunningStatus, fout);
+      track.length += fwriteevent(e, isRunningStatus, fout);
     }
   }
   else if ((mTrackEndingPreference & STOP_ALL_NOTES) > 0)
@@ -773,11 +773,10 @@ bool MidiFile::save(const char * iFile)
     e.volume = MIN_VOLUME;
 
     //dump
-    t.length += fwriteevent(e, false, fout);
+    track.length += fwriteevent(e, false, fout);
   }
 
   //add track footer
-  //t.length += fswapwrite(MIDI_TRACK_FOOTER_ID, fout);
   {
     META_EVENT e;
     if ((mTrackEndingPreference & TRACK_FOOTER_TICKS) > 0)
@@ -789,17 +788,12 @@ bool MidiFile::save(const char * iFile)
     e.size = 0;
 
     //dump
-    t.length += fswapwrite(e, fout);
+    track.length += fswapwrite(e, fout);
   }
 
-  //update track length
-  //t.length += sizeof(MIDI_TRACK_FOOTER_ID);
-
-  //write FILE & TRACK headers again
-  fseek(fout, 0, SEEK_SET);
-  fswapwrite(h, fout);
-  fswapwrite(t, fout);
-
+  //write TRACK headers again
+  fseek(fout, trackFileOffset, SEEK_SET);
+  fswapwrite(track, fout);
 
   fclose(fout);
   return true;
