@@ -30,8 +30,8 @@
 // 04/15/2016 v1.0 - Initial release.
 //
 
-
-#pragma once
+#ifndef VARIABLE_LENGTH_H
+#define VARIABLE_LENGTH_H
 
 inline size_t getVariableLengthMask(int iIndex)
 {
@@ -117,3 +117,5 @@ size_t fwriteVariableLength(const T & iValue, FILE * f)
 {
   return fwriteVariableLength(iValue, 0, f);
 }
+
+#endif //VARIABLE_LENGTH_H

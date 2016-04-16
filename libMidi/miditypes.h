@@ -31,7 +31,8 @@
 //
 
 
-#pragma once
+#ifndef MIDI_TYPES_H
+#define MIDI_TYPES_H
 
 //#include <cstdint>
 //#include <stdint.h>
@@ -43,3 +44,5 @@ typedef short int16_t;
 typedef unsigned short uint16_t;
 typedef char int8_t;
 typedef unsigned char uint8_t;
+
+#endif //MIDI_TYPES_H
