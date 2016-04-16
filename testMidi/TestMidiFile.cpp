@@ -132,6 +132,43 @@ TEST_F(TestMidiFile, testBuzzer)
   ASSERT_TRUE( helper.isFileEquals(outputFile, "testFiles\\buzzer.mid") );
 }
 
+TEST_F(TestMidiFile, testVolume)
+{
+  static const char * outputFile = "testVolume.output.mid";
+
+  MidiFile f;
+  f.setMidiType(MidiFile::MIDI_TYPE_0);
+  f.setTempo(0x051615);
+  f.setName("volume");
+  MidiFile::TRACK_ENDING_PREFERENCE preferences = (MidiFile::TRACK_ENDING_PREFERENCE)(MidiFile::STOP_PREVIOUS_NOTE | MidiFile::TRACK_FOOTER_TICKS);
+  f.setTrackEndingPreference(preferences);
+
+  //for ups and downs
+  for(int j=0; j<3; j++)
+  {
+    static const int numSteps = 20;
+    static const int upDownDurationMs = 1000;
+    static const int volumeStep = 0x7f/numSteps;
+    static const int noteDuration = upDownDurationMs/numSteps;
+
+    int volume = 0;
+    for(int i=0; i<numSteps; i++)
+    {
+      f.setVolume(volume);
+      f.addNote(131, noteDuration); // C3 instead of C4 which is 262
+      volume += volumeStep;
+    }
+    for(int i=0; i<numSteps; i++)
+    {
+      f.setVolume(volume);
+      f.addNote(131, noteDuration); // C3 instead of C4 which is 262
+      volume -= volumeStep;
+    }
+  }
+  bool saved = f.save(outputFile);
+  ASSERT_TRUE(saved);
+}
+
 TEST_F(TestMidiFile, testVariableLength)
 {
   gTestHelper & helper = gTestHelper::getInstance();

@@ -518,11 +518,7 @@ void MidiFile::addNote(uint16_t iFrequency, uint16_t iDurationMs)
 
 void MidiFile::addDelay(uint16_t iDurationMs)
 {
-  NOTE n;
-  n.frequency = 0;
-  n.durationMs = iDurationMs;
-
-  mNotes.push_back(n);
+  addNote(0, iDurationMs);
 }
 
 void MidiFile::setTicksPerQuarterNote(uint16_t iTicks)
@@ -694,7 +690,7 @@ bool MidiFile::save(const char * iFile)
       e.ticks = previousNoteTicks;
       e.status = NOTE_ON_CHANNEL_0;
       e.pitch = findMidiPitchFromFrequency(n.frequency);
-      e.volume = mVolume;
+      e.volume = n.volume;
 
       //dump
       bool isRunningStatus = (previousStatus == e.status);
