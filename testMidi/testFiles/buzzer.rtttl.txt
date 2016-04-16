@@ -1,0 +1,1 @@
+buzzer:d=16,o=4,b=180:c.,p.,c.,p.,c.,p.,c.,p.,c.,p.,c.,p.,c.,p.,c.,p.,c.,p.,c.,p.
