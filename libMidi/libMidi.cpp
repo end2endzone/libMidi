@@ -655,6 +655,7 @@ bool MidiFile::save(const char * iFile)
   }
 
   //force a TEMPO
+  if (mTempo != DEFAULT_TEMPO)
   {
     META_EVENT e;
     e.ticks = 0;
@@ -682,38 +683,36 @@ bool MidiFile::save(const char * iFile)
   for(size_t i=0; i<mNotes.size(); i++)
   {
     const NOTE & n = mNotes[i];
-
-    //build an event for the note
+    
     if (n.frequency)
     {
-      NOTE_EVENT e;
-      e.ticks = previousNoteTicks;
-      e.status = NOTE_ON_CHANNEL_0;
-      e.pitch = findMidiPitchFromFrequency(n.frequency);
-      e.volume = n.volume;
-
-      //dump
-      bool isRunningStatus = (previousStatus == e.status);
-      track.length += fwriteevent(e, isRunningStatus, fout);
-
-      //remember status
-      previousStatus = e.status;
-      //lastAudibleNote = &n;
-      previousPitch = e.pitch;
-    }
-    else
-    {
-      //silenced delay
-
-      if (i > 0)
+      //build an event for the note
       {
-        //stop previous note
-        const NOTE & previous = mNotes[i-1];
+        NOTE_EVENT e;
+        e.ticks = previousNoteTicks;
+        e.status = NOTE_ON_CHANNEL_0;
+        e.pitch = findMidiPitchFromFrequency(n.frequency);
+        e.volume = n.volume;
 
+        //dump
+        bool isRunningStatus = (previousStatus == e.status);
+        track.length += fwriteevent(e, isRunningStatus, fout);
+
+        //remember status
+        previousStatus = e.status;
+        previousPitch = e.pitch;
+        previousNoteTicks = computeTicks(n.durationMs);
+      }
+
+      //if its not the last note
+      //bool hasMoreNotes = (i+1 < mNotes.size());
+      //if (hasMoreNotes)
+      {
+        //now stop the note
         NOTE_EVENT e;
         e.ticks = previousNoteTicks;
         e.status = NOTE_OFF_CHANNEL_0;
-        e.pitch = findMidiPitchFromFrequency(previous.frequency);
+        e.pitch = findMidiPitchFromFrequency(n.frequency);
         e.volume = mVolume;
 
         //dump
@@ -723,43 +722,19 @@ bool MidiFile::save(const char * iFile)
         //remember status
         previousStatus = e.status;
         previousPitch = e.pitch;
-      }
-      else
-      {
-        //that is the first note.
-        //there is no need to turn off the previous note
+        previousNoteTicks = 0; //next note shall begins right after this one
       }
     }
-
-    //remember previous note duration
-    previousNoteTicks = computeTicks(n.durationMs);
+    else
+    {
+      //silenced delay
+      previousNoteTicks = computeTicks(n.durationMs);
+    }
   }
 
   //no more notes to play
   //end the played note
-  if ( (mTrackEndingPreference & STOP_PREVIOUS_NOTE) > 0 && previousPitch != 0 )
-  {
-    const NOTE & lastNote = mNotes[mNotes.size()-1];
-    if (lastNote.frequency == 0)
-    {
-      //last note is a silent note.
-      //there is no note to stop
-    }
-    else
-    {
-      //stopping the note
-      NOTE_EVENT e;
-      e.ticks = previousNoteTicks;
-      e.status = NOTE_OFF_CHANNEL_0;
-      e.pitch = previousPitch;
-      e.volume = mVolume;
-
-      //dump
-      bool isRunningStatus = (previousStatus == e.status);
-      track.length += fwriteevent(e, isRunningStatus, fout);
-    }
-  }
-  else if ((mTrackEndingPreference & STOP_ALL_NOTES) > 0)
+  if ((mTrackEndingPreference & STOP_ALL_NOTES) > 0)
   {
     //silence all notes
     NOTE_EVENT e;
@@ -776,9 +751,13 @@ bool MidiFile::save(const char * iFile)
   {
     META_EVENT e;
     if ((mTrackEndingPreference & TRACK_FOOTER_TICKS) > 0)
+    {
       e.ticks = previousNoteTicks;
+    }
     else
+    {
       e.ticks = 0;
+    }
     e.status = EVENT_META;
     e.type = META_END_OF_TRACK;
     e.size = 0;

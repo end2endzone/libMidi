@@ -74,11 +74,35 @@ TEST_F(TestMidiFile, testCDE)
   static const char * outputFile = "testCDE.output.mid";
 
   MidiFile f;
-  f.addNote(262, 100); //C4
-  f.addNote(294, 100); //D4
-  f.addNote(330, 100); //E4
+  f.setMidiType(MidiFile::MIDI_TYPE_1);
+  f.setTicksPerQuarterNote(0x80);
+  f.setVolume(0x60);
+  f.setTrackEndingPreference(MidiFile::STOP_ALL_NOTES);
+  f.addNote(262, 500); //C4
+  f.addNote(294, 500); //D4
+  f.addNote(330, 500); //E4
   bool saved = f.save(outputFile);
   ASSERT_TRUE(saved);
+
+  //ASSERTION DISABLED. CDE.MID mixes C4, D4 and E4 notes
+  //at the same time which is not supported by the library
+#if 0
+  //ASSERT content is **almost** identical
+  CharSequence actualFileContent   = readFileContentAsArray(outputFile);
+  CharSequence expectedFileContent = readFileContentAsArray("testFiles\\cde1.mid");
+  
+  //expecting file are equals expect that for event for base file uses 0x8000 instead of 00 for timestamp (which is the same)
+  actualFileContent.insert(actualFileContent.begin()+22, 0x80);
+  actualFileContent[21]++; //track size
+
+  ASSERT_EQ(expectedFileContent.size(), actualFileContent.size());
+  for(size_t i=0; i<expectedFileContent.size(); i++)
+  {
+    unsigned char expectedByte = expectedFileContent[i];
+    unsigned char actualByte = actualFileContent[i];
+    ASSERT_EQ(expectedByte, actualByte);
+  }
+#endif
 }
 
 TEST_F(TestMidiFile, testMario1Up)
@@ -86,15 +110,40 @@ TEST_F(TestMidiFile, testMario1Up)
   static const char * outputFile = "testMario1Up.output.mid";
 
   MidiFile f;
+
+  f.setMidiType(MidiFile::MIDI_TYPE_0);
+  f.setTempo(0x051615);
   f.setName("mario1up");
+  f.setVolume(0x64);
+  MidiFile::TRACK_ENDING_PREFERENCE preferences = (MidiFile::TRACK_ENDING_PREFERENCE)(MidiFile::STOP_PREVIOUS_NOTE | MidiFile::TRACK_FOOTER_TICKS);
+  f.setTrackEndingPreference(preferences);
+
+#if 0
+  //mario 1-up.
+  //accurate frequencies
   f.addNote(1319,125);
   f.addNote(1568,125);
   f.addNote(2637,125);
   f.addNote(2093,125);
   f.addNote(2349,125);
   f.addNote(3136,125);
+#else
+  //mario 1-up.
+  //frequencies matching mario1up.mid
+  f.addNote(659 , 125);
+  f.addNote(784 , 125);
+  f.addNote(1319, 125);
+  f.addNote(1047, 125);
+  f.addNote(1175, 125);
+  f.addNote(1568, 125);
+#endif
+
   bool saved = f.save(outputFile);
   ASSERT_TRUE(saved);
+
+  //ASSERT content is identical
+  gTestHelper & helper = gTestHelper::getInstance();
+  ASSERT_TRUE( helper.isFileEquals(outputFile, "testFiles\\mario1up.mid") );
 }
 
 TEST_F(TestMidiFile, test1Second)
@@ -102,17 +151,30 @@ TEST_F(TestMidiFile, test1Second)
   static const char * outputFile = "test1Second.output.mid";
 
   MidiFile f;
-  f.setBeatsPerMinute(90);
+  
+  //BPM setting.
+  //The RTTTL is encoded as 90 BPM but the conversion to
+  //tempo is 1usec too low for binary match the expected file
+  //using direct TEMPO setting instead.
+  //f.setBeatsPerMinute(90);
+  f.setTempo(0x0a2c2b);
+
   f.setName("1second");
-  f.addNote(131, 1000); // C3 instead of C4 which is 262
+  f.setVolume(0x64);
+
+  f.addNote(131, 1001); // C3 instead of C4 which is 262
+
   bool saved = f.save(outputFile);
   ASSERT_TRUE(saved);
+
+  //ASSERT content is identical
+  gTestHelper & helper = gTestHelper::getInstance();
+  ASSERT_TRUE( helper.isFileEquals(outputFile, "testFiles\\1second.mid") );
 }
 
 TEST_F(TestMidiFile, testBuzzer)
 {
   static const char * outputFile = "testBuzzer.output.mid";
-  gTestHelper & helper = gTestHelper::getInstance();
 
   MidiFile f;
   f.setMidiType(MidiFile::MIDI_TYPE_0);
@@ -129,6 +191,8 @@ TEST_F(TestMidiFile, testBuzzer)
   bool saved = f.save(outputFile);
   ASSERT_TRUE(saved);
 
+  //ASSERT content is identical
+  gTestHelper & helper = gTestHelper::getInstance();
   ASSERT_TRUE( helper.isFileEquals(outputFile, "testFiles\\buzzer.mid") );
 }
 
@@ -171,8 +235,6 @@ TEST_F(TestMidiFile, testVolume)
 
 TEST_F(TestMidiFile, testVariableLength)
 {
-  gTestHelper & helper = gTestHelper::getInstance();
-
   //0
   {
     static const char * filename = "0.output.bin";
