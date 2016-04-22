@@ -87,8 +87,16 @@ public:
     MIDI_TYPE_1 = 1
   };
 
+public:
+  //static methods
+  static uint32_t bpm2tempo(uint16_t iBpm);
+  static uint16_t tempo2bpm(uint32_t iTempo);
+  static uint16_t duration2ticks(uint16_t iDurationMs, uint16_t iTicksPerQuarterNote, uint32_t iTempo);
+  static uint16_t ticks2duration(uint16_t iTicks, uint16_t iTicksPerQuarterNote, uint32_t iTempo);
+
 private:
-  uint16_t computeTicks(uint16_t iDurationMs);
+  uint16_t duration2ticks(uint16_t iDurationMs);
+  uint16_t ticks2duration(uint16_t iTicks);
 
 private:
   struct NOTE
