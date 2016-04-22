@@ -528,8 +528,7 @@ void MidiFile::setTicksPerQuarterNote(uint16_t iTicks)
 
 void MidiFile::setBeatsPerMinute(uint16_t iBpm)
 {
-  //BPM 2 tempo
-  mTempo = 1*MIN2USEC/((uint32_t)iBpm);
+  mTempo = bpm2tempo(iBpm);
 }
 
 void MidiFile::setTempo(uint32_t iTempo)
@@ -610,11 +609,40 @@ size_t fswapwrite(const HEADER_ID & id, FILE * f)
   return fwrite(&tmp, 1, sizeof(tmp), f);
 }
 
-uint16_t MidiFile::computeTicks(uint16_t iDurationMs)
+uint32_t MidiFile::bpm2tempo(uint16_t iBpm)
+{
+  //BPM 2 tempo
+  uint32_t tempo = 1*MIN2USEC/((uint32_t)iBpm);
+  return tempo;
+}
+
+uint16_t MidiFile::tempo2bpm(uint32_t iTempo)
+{
+  uint16_t bpm = 1*MIN2USEC/(iTempo);
+  return bpm;
+}
+
+uint16_t MidiFile::duration2ticks(uint16_t iDurationMs, uint16_t iTicksPerQuarterNote, uint32_t iTempo)
+{
+  uint32_t noteticks = (1000*iDurationMs*iTicksPerQuarterNote)/iTempo;
+  return (uint16_t)noteticks;
+}
+
+uint16_t MidiFile::ticks2duration(uint16_t iTicks, uint16_t iTicksPerQuarterNote, uint32_t iTempo)
 {
   //formula: noteticks/mTicksPerQuarterNote*tempo/1000=notedurationMs
-  uint32_t noteticks = (1000*iDurationMs*mTicksPerQuarterNote)/mTempo;
-  return (uint16_t)noteticks;
+  uint32_t durationMs = (iTicks*iTempo)/(1000*iTicks);
+  return (uint16_t)durationMs;
+}
+
+uint16_t MidiFile::duration2ticks(uint16_t iDurationMs)
+{
+  return duration2ticks(iDurationMs, mTicksPerQuarterNote, mTempo);
+}
+
+uint16_t MidiFile::ticks2duration(uint16_t iTicks)
+{
+  return ticks2duration(iTicks, mTicksPerQuarterNote, mTempo);
 }
 
 bool MidiFile::save(const char * iFile)
@@ -701,7 +729,7 @@ bool MidiFile::save(const char * iFile)
         //remember status
         previousStatus = e.status;
         previousPitch = e.pitch;
-        previousNoteTicks = computeTicks(n.durationMs);
+        previousNoteTicks = duration2ticks(n.durationMs);
       }
 
       //if its not the last note
@@ -728,7 +756,7 @@ bool MidiFile::save(const char * iFile)
     else
     {
       //silenced delay
-      previousNoteTicks = computeTicks(n.durationMs);
+      previousNoteTicks = duration2ticks(n.durationMs);
     }
   }
 
