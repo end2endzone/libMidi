@@ -115,8 +115,6 @@ TEST_F(TestMidiFile, testMario1Up)
   f.setTempo(0x051615);
   f.setName("mario1up");
   f.setVolume(0x64);
-  MidiFile::TRACK_ENDING_PREFERENCE preferences = (MidiFile::TRACK_ENDING_PREFERENCE)(MidiFile::STOP_PREVIOUS_NOTE | MidiFile::TRACK_FOOTER_TICKS);
-  f.setTrackEndingPreference(preferences);
 
 #if 0
   //mario 1-up.
@@ -181,8 +179,6 @@ TEST_F(TestMidiFile, testBuzzer)
   f.setTempo(0x051615);
   f.setName("buzzer");
   f.setVolume(0x64);
-  MidiFile::TRACK_ENDING_PREFERENCE preferences = (MidiFile::TRACK_ENDING_PREFERENCE)(MidiFile::STOP_PREVIOUS_NOTE | MidiFile::TRACK_FOOTER_TICKS);
-  f.setTrackEndingPreference(preferences);
   for(int i=0; i<10; i++)
   {
     f.addNote(131, 125); // C3 instead of C4 which is 262
@@ -204,8 +200,6 @@ TEST_F(TestMidiFile, testVolume)
   f.setMidiType(MidiFile::MIDI_TYPE_0);
   f.setTempo(0x051615);
   f.setName("volume");
-  MidiFile::TRACK_ENDING_PREFERENCE preferences = (MidiFile::TRACK_ENDING_PREFERENCE)(MidiFile::STOP_PREVIOUS_NOTE | MidiFile::TRACK_FOOTER_TICKS);
-  f.setTrackEndingPreference(preferences);
 
   //for ups and downs
   for(int j=0; j<3; j++)
