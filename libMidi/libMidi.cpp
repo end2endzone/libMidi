@@ -502,7 +502,7 @@ MidiFile::MidiFile()
   mTicksPerQuarterNote = MidiFile::DEFAULT_TICKS_PER_QUARTER_NOTE;
   mTempo = MidiFile::DEFAULT_TEMPO;
   mVolume = 0x7f;
-  mTrackEndingPreference = (TRACK_ENDING_PREFERENCE)(STOP_PREVIOUS_NOTE | TRACK_FOOTER_TICKS);
+  mTrackEndingPreference = STOP_PREVIOUS_NOTE;
   mType = MIDI_TYPE_0;
 }
 
@@ -732,10 +732,29 @@ bool MidiFile::save(const char * iFile)
         previousNoteTicks = duration2ticks(n.durationMs);
       }
 
-      //if its not the last note
-      //bool hasMoreNotes = (i+1 < mNotes.size());
-      //if (hasMoreNotes)
+      //if its the last note
+      bool isLastNote = (i == mNotes.size()-1);
+      if (isLastNote && (mTrackEndingPreference & STOP_ALL_NOTES) == STOP_ALL_NOTES)
       {
+        //silence all notes
+        NOTE_EVENT e;
+        e.ticks = previousNoteTicks;
+        e.status = CONTROLCHANGE_B_CHANNEL_0;
+        e.pitch = ALL_NOTES_OFF;
+        e.volume = MIN_VOLUME;
+
+        //dump
+        bool isRunningStatus = (previousStatus == e.status);
+        track.length += fwriteevent(e, isRunningStatus, fout);
+
+        //remember status
+        previousStatus = e.status;
+        previousPitch = e.pitch;
+        previousNoteTicks = 0; //next note shall begins right after this one
+      }
+      else
+      {
+        //more notes to come
         //now stop the note
         NOTE_EVENT e;
         e.ticks = previousNoteTicks;
@@ -760,32 +779,10 @@ bool MidiFile::save(const char * iFile)
     }
   }
 
-  //no more notes to play
-  //end the played note
-  if ((mTrackEndingPreference & STOP_ALL_NOTES) > 0)
-  {
-    //silence all notes
-    NOTE_EVENT e;
-    e.ticks = previousNoteTicks;
-    e.status = CONTROLCHANGE_B_CHANNEL_0;
-    e.pitch = ALL_NOTES_OFF;
-    e.volume = MIN_VOLUME;
-
-    //dump
-    track.length += fwriteevent(e, false, fout);
-  }
-
   //add track footer
   {
     META_EVENT e;
-    if ((mTrackEndingPreference & TRACK_FOOTER_TICKS) > 0)
-    {
-      e.ticks = previousNoteTicks;
-    }
-    else
-    {
-      e.ticks = 0;
-    }
+    e.ticks = previousNoteTicks;
     e.status = EVENT_META;
     e.type = META_END_OF_TRACK;
     e.size = 0;

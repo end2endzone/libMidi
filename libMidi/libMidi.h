@@ -79,7 +79,6 @@ public:
   {
     STOP_PREVIOUS_NOTE = 1,
     STOP_ALL_NOTES = 2,
-    TRACK_FOOTER_TICKS = 4,
   };
   enum MIDI_TYPE
   {
