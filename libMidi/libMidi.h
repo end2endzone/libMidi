@@ -66,11 +66,13 @@ public:
   void setTempo(uint32_t iTempo); //usec per quarter note
   void setName(const char * iName);
   void setVolume(int8_t iVolume);
+  void setInstrument(int8_t iInstrument);
   void setTrackEndingPreference(TRACK_ENDING_PREFERENCE iTrackEndingPreference);
   void setMidiType(MIDI_TYPE iType);
   bool save(const char * iFile);
 
 public:
+  static const uint8_t  DEFAULT_INSTRUMENT = 0x00;
   static const uint16_t DEFAULT_BPM = 120;
   static const uint32_t DEFAULT_TEMPO = 500000;
   static const uint32_t DEFAULT_TICKS_PER_QUARTER_NOTE = 480;
@@ -92,6 +94,8 @@ public:
   static uint16_t tempo2bpm(uint32_t iTempo);
   static uint16_t duration2ticks(uint16_t iDurationMs, uint16_t iTicksPerQuarterNote, uint32_t iTempo);
   static uint16_t ticks2duration(uint16_t iTicks, uint16_t iTicksPerQuarterNote, uint32_t iTempo);
+  static int8_t findInstrument(const char * iName);
+  static const char * getInstrumentName(int8_t iInstrument);
 
 private:
   uint16_t duration2ticks(uint16_t iDurationMs);
@@ -110,6 +114,7 @@ private:
   std::string mName;
   NoteList mNotes;
   int8_t mVolume; //from 0x00 to 0x7f
+  int8_t mInstrument; //from 0x00 to 0x7f
   TRACK_ENDING_PREFERENCE mTrackEndingPreference;
   MIDI_TYPE mType;
 };

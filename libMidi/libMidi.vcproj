@@ -207,7 +207,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\midiinstruments.h"
+				>
+			</File>
+			<File
 				RelativePath=".\miditypes.h"
+				>
+			</File>
+			<File
+				RelativePath=".\pitches.h"
 				>
 			</File>
 			<File
