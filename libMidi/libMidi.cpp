@@ -133,12 +133,17 @@ struct META_EVENT
 
 EVENT_PITCH findMidiPitchFromFrequency(unsigned short frequency)
 {
-#define DECLARE_PITCH(midiPitchId, note_frequency) \
-  case note_frequency:  \
-    return midiPitchId;
+  if (frequency <= NOTE_C0)
+    return 0x0C;
 
-  switch(frequency)
+#define DECLARE_PITCH(midiPitchId, note_frequency) {midiPitchId, note_frequency},
+
+  struct PITCH_NOTE_PAIR
   {
+    EVENT_PITCH pitch;
+    int16_t frequency;
+  };
+  static const PITCH_NOTE_PAIR pairs[] = {
     DECLARE_PITCH(0x7F, NOTE_G9)
     DECLARE_PITCH(0x7E, NOTE_GB9)
     DECLARE_PITCH(0x7D, NOTE_F9)
@@ -267,9 +272,32 @@ EVENT_PITCH findMidiPitchFromFrequency(unsigned short frequency)
     //DECLARE_PITCH(0x02, NOTE_D)
     //DECLARE_PITCH(0x01, NOTE_DB)
     //DECLARE_PITCH(0x00, NOTE_C)
-    default:
-      return 0x0C;
   };
+#undef DECLARE_PITCH
+  static const int16_t numPairs = sizeof(pairs)/sizeof(pairs[0]);
+
+  //search for a perfect match
+  for(int16_t i=0; i<numPairs; i++)
+  {
+    if (frequency == pairs[i].frequency)
+      return pairs[i].pitch;
+  }
+
+  //not found. look for the closer one
+  EVENT_PITCH closerPitch = 0x0C;
+  int16_t minDiff = 0x7FFF;
+  for(int16_t i=0; i<numPairs; i++)
+  {
+    //calculate frequency diff
+    int16_t diff = abs(frequency - pairs[i].frequency);
+    if (diff <= minDiff)
+    {
+      //closer match found
+      closerPitch = pairs[i].pitch;
+      minDiff = diff;
+    }
+  }
+  return closerPitch;
 }
 
 template <typename T>
