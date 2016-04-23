@@ -31,8 +31,8 @@
 //
 
 
-#ifndef MIDI_TYPES_H
-#define MIDI_TYPES_H
+#ifndef WINSTDINT_H
+#define WINSTDINT_H
 
 //#include <cstdint>
 //#include <stdint.h>
@@ -45,4 +45,4 @@ typedef unsigned short uint16_t;
 typedef char int8_t;
 typedef unsigned char uint8_t;
 
-#endif //MIDI_TYPES_H
+#endif //WINSTDINT_H
