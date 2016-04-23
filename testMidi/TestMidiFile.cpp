@@ -196,6 +196,53 @@ TEST_F(TestMidiFile, testBuzzer)
   ASSERT_TRUE( helper.isFileEquals(outputFile, "testFiles\\buzzer.mid") );
 }
 
+TEST_F(TestMidiFile, testBuzzerWrongFrequencies)
+{
+  static const char * outputFile = "testBuzzer.output.mid";
+
+  //test with 2Hz higher than normal note
+  {
+    MidiFile f;
+    f.setInstrument(0x51);
+    f.setMidiType(MidiFile::MIDI_TYPE_0);
+    f.setTempo(0x051615);
+    f.setName("buzzer");
+    f.setVolume(0x64);
+    for(int i=0; i<10; i++)
+    {
+      f.addNote(133 /*instead of 131*/, 125);
+      f.addDelay(125);
+    }
+    bool saved = f.save(outputFile);
+    ASSERT_TRUE(saved);
+
+    //ASSERT content is identical
+    gTestHelper & helper = gTestHelper::getInstance();
+    ASSERT_TRUE( helper.isFileEquals(outputFile, "testFiles\\buzzer.mid") );
+  }
+
+  //test with 2Hz lower than normal note
+  {
+    MidiFile f;
+    f.setInstrument(0x51);
+    f.setMidiType(MidiFile::MIDI_TYPE_0);
+    f.setTempo(0x051615);
+    f.setName("buzzer");
+    f.setVolume(0x64);
+    for(int i=0; i<10; i++)
+    {
+      f.addNote(129 /*instead of 131*/, 125);
+      f.addDelay(125);
+    }
+    bool saved = f.save(outputFile);
+    ASSERT_TRUE(saved);
+
+    //ASSERT content is identical
+    gTestHelper & helper = gTestHelper::getInstance();
+    ASSERT_TRUE( helper.isFileEquals(outputFile, "testFiles\\buzzer.mid") );
+  }
+}
+
 TEST_F(TestMidiFile, testVolume)
 {
   static const char * outputFile = "testVolume.output.mid";
