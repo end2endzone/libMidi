@@ -72,6 +72,7 @@ public:
   bool save(const char * iFile);
 
 public:
+  static const uint32_t VERSION = 0x0100; //1.0.0
   static const uint8_t  DEFAULT_INSTRUMENT = 0x00;
   static const uint16_t DEFAULT_BPM = 120;
   static const uint32_t DEFAULT_TEMPO = 500000;
