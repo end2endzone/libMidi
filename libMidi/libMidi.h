@@ -61,19 +61,20 @@ public:
   enum MIDI_TYPE;
 
 	MidiFile(void);
-  void addNote(uint16_t iFrequency, uint16_t iDurationMs);
-  void addDelay(uint16_t iDurationMs);
-  void setTicksPerQuarterNote(uint16_t iTicks);
-  void setBeatsPerMinute(uint16_t iBpm);
-  void setTempo(uint32_t iTempo); //usec per quarter note
+  void setMidiType(MIDI_TYPE iType);
   void setName(const char * iName);
   void setVolume(int8_t iVolume);
   void setInstrument(int8_t iInstrument);
+  void setTicksPerQuarterNote(uint16_t iTicks);
+  void setBeatsPerMinute(uint16_t iBpm);
+  void setTempo(uint32_t iTempo); //usec per quarter note
   void setTrackEndingPreference(TRACK_ENDING_PREFERENCE iTrackEndingPreference);
-  void setMidiType(MIDI_TYPE iType);
+  void addNote(uint16_t iFrequency, uint16_t iDurationMs);
+  void addDelay(uint16_t iDurationMs);
   bool save(const char * iFile);
 
 public:
+  //public values & enums
   static const uint8_t  DEFAULT_INSTRUMENT = 0x00;
   static const uint16_t DEFAULT_BPM = 120;
   static const uint32_t DEFAULT_TEMPO = 500000;
@@ -100,10 +101,12 @@ public:
   static const char * getInstrumentName(int8_t iInstrument);
 
 private:
+  //private methods
   uint16_t duration2ticks(uint16_t iDurationMs);
   uint16_t ticks2duration(uint16_t iTicks);
 
 private:
+  //private attributes
   struct NOTE
   {
     uint16_t frequency;
