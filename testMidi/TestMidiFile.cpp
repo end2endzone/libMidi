@@ -111,6 +111,7 @@ TEST_F(TestMidiFile, testMario1Up)
 
   MidiFile f;
 
+  f.setInstrument(0x51);
   f.setMidiType(MidiFile::MIDI_TYPE_0);
   f.setTempo(0x051615);
   f.setName("mario1up");
@@ -150,6 +151,8 @@ TEST_F(TestMidiFile, test1Second)
 
   MidiFile f;
   
+  f.setInstrument(0x51);
+
   //BPM setting.
   //The RTTTL is encoded as 90 BPM but the conversion to
   //tempo is 1usec too low for binary match the expected file
@@ -175,6 +178,7 @@ TEST_F(TestMidiFile, testBuzzer)
   static const char * outputFile = "testBuzzer.output.mid";
 
   MidiFile f;
+  f.setInstrument(0x51);
   f.setMidiType(MidiFile::MIDI_TYPE_0);
   f.setTempo(0x051615);
   f.setName("buzzer");
@@ -225,6 +229,48 @@ TEST_F(TestMidiFile, testVolume)
   }
   bool saved = f.save(outputFile);
   ASSERT_TRUE(saved);
+}
+
+TEST_F(TestMidiFile, testFindInstrument)
+{
+  ASSERT_EQ(0x00, MidiFile::findInstrument("") );
+  ASSERT_EQ(0x00, MidiFile::findInstrument(NULL) );
+  ASSERT_EQ(0x00, MidiFile::findInstrument("Acoustic Grand Piano") );
+  ASSERT_EQ(0x01, MidiFile::findInstrument("Bright Acoustic Piano") );
+  ASSERT_EQ(0x7f, MidiFile::findInstrument("Gunshot") );
+}
+
+TEST_F(TestMidiFile, testGetInstrumentName)
+{
+  ASSERT_TRUE( std::string("Acoustic Grand Piano") == MidiFile::getInstrumentName(0x00) );
+  ASSERT_TRUE( std::string("Acoustic Grand Piano") == MidiFile::getInstrumentName(-1) );
+  ASSERT_TRUE( std::string("Bright Acoustic Piano") == MidiFile::getInstrumentName(0x01) );
+  ASSERT_TRUE( std::string("Gunshot") == MidiFile::getInstrumentName(0x7f) );
+  ASSERT_TRUE( std::string("Acoustic Grand Piano") == MidiFile::getInstrumentName((char)0xff) );
+}
+
+TEST_F(TestMidiFile, testAllInstruments)
+{
+  MidiFile f;
+  f.setMidiType(MidiFile::MIDI_TYPE_0);
+  f.setTempo(0x051615);
+  f.setName("allbuzzer");
+  f.setVolume(0x7f);
+  for(int i=0; i<10; i++)
+  {
+    f.addNote(131, 125); // C3 instead of C4 which is 262
+    f.addDelay(125);
+  }
+
+  for(int8_t i=0; i>=0 && i<=0x7f; i++)
+  {
+    char outputFile[80];
+    sprintf(outputFile, "testAllInstruments.%03d (0x%02x).output.mid", ((int)i)+1, i);
+
+    f.setInstrument(i);
+    bool saved = f.save(outputFile);
+    ASSERT_TRUE(saved);
+  }
 }
 
 TEST_F(TestMidiFile, testVariableLength)
