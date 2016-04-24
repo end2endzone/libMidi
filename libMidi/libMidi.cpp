@@ -36,16 +36,6 @@
 //   Library for building a simple song based on 
 //   single channel MIDI file.
 //
-// References:
-//   Based on the following:
-//      http://kevinboone.net/javamidi.html
-//      http://www.ccarh.org/courses/253/handout/smf/
-//      http://www.skytopia.com/project/articles/midi.html
-//      http://people.virginia.edu/~pdr4h/pitch-freq.html
-//      http://www.phy.mtu.edu/~suits/notefreqs.html
-//      http://stackoverflow.com/questions/5288593/how-to-convert-midi-timeline-into-the-actual-timeline-that-should-be-played/5297236#5297236
-//      http://www.lastrayofhope.co.uk/2009/12/23/midi-delta-time-ticks-to-seconds/2/
-//
 
 #include "libMidi.h"
 #include "winstdint.h"
