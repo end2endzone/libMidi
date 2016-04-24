@@ -33,7 +33,17 @@
 #ifndef VARIABLE_LENGTH_H
 #define VARIABLE_LENGTH_H
 
-inline size_t getVariableLengthMask(int iIndex)
+/// <summary>
+/// Computes a 32-bits mask for reading the nth block of 7 bits long.
+/// </summary>
+/// <param name="iIndex">
+/// The 0-based index of the 7-bits blocks. ie:
+/// index 0 creates a mask for bit  0 to bit  6
+/// index 1 creates a mask for bit  7 to bit 13
+/// index 2 creates a mask for bit 14 to bit 20
+/// </param>
+/// <returns>Returns a 32-bits mask.</returns>
+inline uint32_t getVariableLengthMask(int iIndex)
 {
   //size_t i = 1;
   //i << ((index+1)*7);
@@ -52,6 +62,37 @@ inline size_t getVariableLengthMask(int iIndex)
   return masks[iIndex];
 }
 
+/// <summary>
+/// Writes a value as a Variable Length Quantity to a file.
+/// </summary>
+/// <remarks>
+/// Variable Length Quantity numbers are represented as 7 bits per byte,
+/// most significant bits first. All bytes except the last have bit 7
+/// set, and the last byte has bit 7 clear. If the number is between 0
+/// and 127, it is thus represented exactly as one byte.
+/// For example:
+///
+///     Values    Variable Length Quantity
+///     00000000  00
+///     00000040  40
+///     0000007F  7F
+///     00000080  81 00
+///     00002000  C0 00
+///     00003FFF  FF 7F
+///     00004000  81 80 00
+///     00100000  C0 80 00
+///     001FFFFF  FF FF 7F
+///     00200000  81 80 80 00
+///     08000000  C0 80 80 00
+///     0FFFFFFF  FF FF FF 7F
+/// </remarks>
+/// <param name="iValue">The value to be written to file</param>
+/// <param name="iMinOutputSize">The minimum output size in byte.
+/// ie: Writing the value 0x00000000 is normaly written as 1 byte 0x00.
+/// Forcing minimum byte to 2 result in the following bytes written:
+/// 0x80 0x00 which is the same value.</param>
+/// <param name="f">The FILE* handle</param>
+/// <returns>Returns the number of bytes written to the file</returns>
 template <typename T>
 size_t fwriteVariableLength(const T & iValue, size_t iMinOutputSize, FILE * f)
 {
@@ -111,6 +152,33 @@ size_t fwriteVariableLength(const T & iValue, size_t iMinOutputSize, FILE * f)
   return writeSize;
 }
 
+/// <summary>
+/// Writes a value as a Variable Length Quantity to a file.
+/// </summary>
+/// <remarks>
+/// Variable Length Quantity numbers are represented as 7 bits per byte,
+/// most significant bits first. All bytes except the last have bit 7
+/// set, and the last byte has bit 7 clear. If the number is between 0
+/// and 127, it is thus represented exactly as one byte.
+/// For example:
+///
+///     Values    Variable Length Quantity
+///     00000000  00
+///     00000040  40
+///     0000007F  7F
+///     00000080  81 00
+///     00002000  C0 00
+///     00003FFF  FF 7F
+///     00004000  81 80 00
+///     00100000  C0 80 00
+///     001FFFFF  FF FF 7F
+///     00200000  81 80 80 00
+///     08000000  C0 80 80 00
+///     0FFFFFFF  FF FF FF 7F
+/// </remarks>
+/// <param name="iValue">The value to be written to file</param>
+/// <param name="f">The FILE* handle</param>
+/// <returns>Returns the number of bytes written to the file</returns>
 template <typename T>
 size_t fwriteVariableLength(const T & iValue, FILE * f)
 {

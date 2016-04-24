@@ -48,7 +48,7 @@
 //
 
 #include "libMidi.h"
-#include "miditypes.h"
+#include "winstdint.h"
 #include "varlength.h"
 #include "pitches.h"
 #include "midiinstruments.h"
@@ -133,6 +133,10 @@ struct META_EVENT
 
 EVENT_PITCH findMidiPitchFromFrequency(unsigned short frequency)
 {
+  //According to General MIDI Lite, v1.0,
+  //section 3.1.7
+  //available at https://www.midi.org/images/downloads/GML-v1.pdf
+
   if (frequency <= NOTE_C0)
     return 0x0C;
 
@@ -362,7 +366,10 @@ void MidiFile::setTempo(uint32_t iTempo)
 
 void MidiFile::setName(const char * iName)
 {
-  mName = iName;
+  if (iName == NULL)
+    mName = "";
+  else
+    mName = iName;
 }
 
 void MidiFile::setVolume(int8_t iVolume)

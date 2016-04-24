@@ -4,7 +4,7 @@
 //#include <stdio.h>
 //#include <tchar.h>
 #include "libMidi.h"
-#include "miditypes.h"
+#include "winstdint.h"
 #include "varlength.h"
 
 #include "gtesthelper.h"
