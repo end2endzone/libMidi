@@ -26,7 +26,7 @@
 #define LIBMIDI_H
 
 #include "libMidi\config.h"
-#include "winstdint.h"
+#include <stdint.h>
 
 #include <vector>
 #include <string>

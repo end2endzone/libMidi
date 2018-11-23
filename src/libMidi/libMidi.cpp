@@ -29,7 +29,6 @@
 //
 
 #include "libMidi/libMidi.h"
-#include "libMidi/winstdint.h"
 #include "varlength.h"
 #include "pitches.h"
 #include "midiinstruments.h"

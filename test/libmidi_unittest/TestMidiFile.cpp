@@ -28,7 +28,6 @@
 //#include <stdio.h>
 //#include <tchar.h>
 #include "libMidi/libMidi.h"
-#include "libMidi/winstdint.h"
 #include "../../src/libMidi/varlength.h"
 
 #include "gtesthelper.h"
