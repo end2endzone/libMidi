@@ -25,12 +25,11 @@
 // TestMidiFile.cpp : Defines the entry point for the console application.
 //
 
-//#include <stdio.h>
-//#include <tchar.h>
 #include "libMidi/libMidi.h"
 #include "../../src/libMidi/varlength.h"
 
-#include "gtesthelper.h"
+#include "rapidassist/gtesthelp.h"
+
 #include <vector>
 
 #include "TestMidiFile.h"
@@ -85,7 +84,6 @@ CharSequence readFileContentAsArray(const char * iFilePath)
 
 void TestMidiFile::SetUp()
 {
-  gTestHelper & helper = gTestHelper::getInstance();
 }
 
 void TestMidiFile::TearDown()
@@ -164,8 +162,7 @@ TEST_F(TestMidiFile, testMario1Up)
   ASSERT_TRUE(saved);
 
   //ASSERT content is identical
-  gTestHelper & helper = gTestHelper::getInstance();
-  ASSERT_TRUE( helper.isFileEquals(outputFile, "test_files\\mario1up.mid") );
+  ASSERT_TRUE( ra::gtesthelp::isFileEquals(outputFile, "test_files\\mario1up.mid") );
 }
 
 TEST_F(TestMidiFile, test1Second)
@@ -192,8 +189,7 @@ TEST_F(TestMidiFile, test1Second)
   ASSERT_TRUE(saved);
 
   //ASSERT content is identical
-  gTestHelper & helper = gTestHelper::getInstance();
-  ASSERT_TRUE( helper.isFileEquals(outputFile, "test_files\\1second.mid") );
+  ASSERT_TRUE( ra::gtesthelp::isFileEquals(outputFile, "test_files\\1second.mid") );
 }
 
 TEST_F(TestMidiFile, testBuzzer)
@@ -215,8 +211,7 @@ TEST_F(TestMidiFile, testBuzzer)
   ASSERT_TRUE(saved);
 
   //ASSERT content is identical
-  gTestHelper & helper = gTestHelper::getInstance();
-  ASSERT_TRUE( helper.isFileEquals(outputFile, "test_files\\buzzer.mid") );
+  ASSERT_TRUE( ra::gtesthelp::isFileEquals(outputFile, "test_files\\buzzer.mid") );
 }
 
 TEST_F(TestMidiFile, testBuzzerWrongFrequencies)
@@ -240,8 +235,7 @@ TEST_F(TestMidiFile, testBuzzerWrongFrequencies)
     ASSERT_TRUE(saved);
 
     //ASSERT content is identical
-    gTestHelper & helper = gTestHelper::getInstance();
-    ASSERT_TRUE( helper.isFileEquals(outputFile, "test_files\\buzzer.mid") );
+    ASSERT_TRUE( ra::gtesthelp::isFileEquals(outputFile, "test_files\\buzzer.mid") );
   }
 
   //test with 2Hz lower than normal note
@@ -261,8 +255,7 @@ TEST_F(TestMidiFile, testBuzzerWrongFrequencies)
     ASSERT_TRUE(saved);
 
     //ASSERT content is identical
-    gTestHelper & helper = gTestHelper::getInstance();
-    ASSERT_TRUE( helper.isFileEquals(outputFile, "test_files\\buzzer.mid") );
+    ASSERT_TRUE( ra::gtesthelp::isFileEquals(outputFile, "test_files\\buzzer.mid") );
   }
 }
 

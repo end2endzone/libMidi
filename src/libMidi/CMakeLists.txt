@@ -8,7 +8,7 @@ add_library(libmidi
   ${LIBMIDI_VERSION_HEADER}
   ${LIBMIDI_CONFIG_HEADER}
   libMidi.cpp
-  midiinstruments.h
+  instruments.h
   pitches.h
   varlength.h
 )

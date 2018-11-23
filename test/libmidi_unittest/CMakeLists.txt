@@ -2,8 +2,6 @@ add_executable(libmidi_unittest
   ${LIBMIDI_EXPORT_HEADER}
   ${LIBMIDI_VERSION_HEADER}
   ${LIBMIDI_CONFIG_HEADER}
-  gtesthelper.cpp
-  gtesthelper.h
   main.cpp
   TestMidiFile.cpp
   TestMidiFile.h

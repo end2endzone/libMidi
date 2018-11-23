@@ -31,7 +31,7 @@
 #include "libMidi/libMidi.h"
 #include "varlength.h"
 #include "pitches.h"
-#include "midiinstruments.h"
+#include "instruments.h"
 
 typedef uint32_t HEADER_ID;
 static const HEADER_ID MIDI_FILE_ID = 0x4d546864; //"MThd"
