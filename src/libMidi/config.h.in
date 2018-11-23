@@ -1,0 +1,15 @@
+@LICENSE@
+#ifndef LIBMIDI_CONFIG_H
+#define LIBMIDI_CONFIG_H
+
+@LIBMIDI_BUILD_TYPE_CPP_DEFINE@
+
+#ifdef LIBMIDI_BUILT_AS_SHARED
+#   include "export.h"
+#endif
+
+#ifndef LIBMIDI_EXPORT
+#   define LIBMIDI_EXPORT
+#endif
+
+#endif //LIBMIDI_CONFIG_H

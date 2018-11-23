@@ -3,9 +3,9 @@
 
 //#include <stdio.h>
 //#include <tchar.h>
-#include "libMidi.h"
-#include "winstdint.h"
-#include "varlength.h"
+#include "libMidi/libMidi.h"
+#include "libMidi/winstdint.h"
+#include "../../src/libMidi/varlength.h"
 
 #include "gtesthelper.h"
 #include <vector>
@@ -89,7 +89,7 @@ TEST_F(TestMidiFile, testCDE)
 #if 0
   //ASSERT content is **almost** identical
   CharSequence actualFileContent   = readFileContentAsArray(outputFile);
-  CharSequence expectedFileContent = readFileContentAsArray("testFiles\\cde1.mid");
+  CharSequence expectedFileContent = readFileContentAsArray("test_files\\cde1.mid");
   
   //expecting file are equals expect that for event for base file uses 0x8000 instead of 00 for timestamp (which is the same)
   actualFileContent.insert(actualFileContent.begin()+22, 0x80);
@@ -142,7 +142,7 @@ TEST_F(TestMidiFile, testMario1Up)
 
   //ASSERT content is identical
   gTestHelper & helper = gTestHelper::getInstance();
-  ASSERT_TRUE( helper.isFileEquals(outputFile, "testFiles\\mario1up.mid") );
+  ASSERT_TRUE( helper.isFileEquals(outputFile, "test_files\\mario1up.mid") );
 }
 
 TEST_F(TestMidiFile, test1Second)
@@ -170,7 +170,7 @@ TEST_F(TestMidiFile, test1Second)
 
   //ASSERT content is identical
   gTestHelper & helper = gTestHelper::getInstance();
-  ASSERT_TRUE( helper.isFileEquals(outputFile, "testFiles\\1second.mid") );
+  ASSERT_TRUE( helper.isFileEquals(outputFile, "test_files\\1second.mid") );
 }
 
 TEST_F(TestMidiFile, testBuzzer)
@@ -193,7 +193,7 @@ TEST_F(TestMidiFile, testBuzzer)
 
   //ASSERT content is identical
   gTestHelper & helper = gTestHelper::getInstance();
-  ASSERT_TRUE( helper.isFileEquals(outputFile, "testFiles\\buzzer.mid") );
+  ASSERT_TRUE( helper.isFileEquals(outputFile, "test_files\\buzzer.mid") );
 }
 
 TEST_F(TestMidiFile, testBuzzerWrongFrequencies)
@@ -218,7 +218,7 @@ TEST_F(TestMidiFile, testBuzzerWrongFrequencies)
 
     //ASSERT content is identical
     gTestHelper & helper = gTestHelper::getInstance();
-    ASSERT_TRUE( helper.isFileEquals(outputFile, "testFiles\\buzzer.mid") );
+    ASSERT_TRUE( helper.isFileEquals(outputFile, "test_files\\buzzer.mid") );
   }
 
   //test with 2Hz lower than normal note
@@ -239,7 +239,7 @@ TEST_F(TestMidiFile, testBuzzerWrongFrequencies)
 
     //ASSERT content is identical
     gTestHelper & helper = gTestHelper::getInstance();
-    ASSERT_TRUE( helper.isFileEquals(outputFile, "testFiles\\buzzer.mid") );
+    ASSERT_TRUE( helper.isFileEquals(outputFile, "test_files\\buzzer.mid") );
   }
 }
 
