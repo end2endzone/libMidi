@@ -24,7 +24,6 @@
 
 #include <stdio.h>
 #include <iostream>
-#include <stdio.h>
 
 #include <gtest/gtest.h>
 

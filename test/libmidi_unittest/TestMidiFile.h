@@ -22,7 +22,8 @@
  * SOFTWARE.
  *********************************************************************************/
 
-#pragma once
+#ifndef TESTMIDIFILE_H
+#define TESTMIDIFILE_H
 
 #include <gtest/gtest.h>
 
@@ -32,3 +33,5 @@ public:
   virtual void SetUp();
   virtual void TearDown();
 };
+
+#endif //TESTMIDIFILE_H

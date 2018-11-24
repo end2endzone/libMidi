@@ -29,9 +29,6 @@
 #include "../../src/libMidi/varlength.h"
 
 #include "rapidassist/gtesthelp.h"
-
-#include <vector>
-
 #include "TestMidiFile.h"
 
 typedef std::vector<unsigned char> CharSequence;

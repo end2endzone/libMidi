@@ -26,12 +26,11 @@
 #define LIBMIDI_H
 
 #include "libMidi\config.h"
-#include <stdint.h>
+#include "libMidi\version.h"
 
+#include <stdint.h>
 #include <vector>
 #include <string>
-
-#define LIBMIDI_VERSION 0x0100 /*1.0.0*/
 
 /// <summary>
 /// Defines the MidiFile class.

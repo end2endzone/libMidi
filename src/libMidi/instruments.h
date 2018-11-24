@@ -22,8 +22,8 @@
  * SOFTWARE.
  *********************************************************************************/
 
-#ifndef MIDIINSTRUMENTS_H
-#define MIDIINSTRUMENTS_H
+#ifndef INSTRUMENTS_H
+#define INSTRUMENTS_H
 
 //
 // Description:
@@ -160,4 +160,4 @@ static const char * gInstruments[] = {
   "Gunshot"
 };
 
-#endif //MIDIINSTRUMENTS_H
+#endif //INSTRUMENTS_H
