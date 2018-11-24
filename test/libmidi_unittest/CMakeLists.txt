@@ -38,7 +38,6 @@ install(TARGETS libmidi_unittest
         LIBRARY DESTINATION ${LIBMIDI_INSTALL_LIB_DIR}
         RUNTIME DESTINATION ${LIBMIDI_INSTALL_BIN_DIR}
 )
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Test.CommandLines.Windows.txt       
-              ${CMAKE_CURRENT_SOURCE_DIR}/Test.CommandLines.Linux.txt
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test_files
         DESTINATION ${LIBMIDI_INSTALL_BIN_DIR}
 )
