@@ -26,7 +26,7 @@
 //
 
 #include "libMidi/libMidi.h"
-#include "../../src/libMidi/varlength.h"
+#include "varlength.h"
 
 #include "rapidassist/gtesthelp.h"
 #include "TestMidiFile.h"

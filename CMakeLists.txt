@@ -114,9 +114,10 @@ endif()
 
 # Define include directories for source code.
 # The specified values will not be exported.
-set( LIBMIDI_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
-include_directories(${LIBMIDI_INCLUDE_DIR}   # public header files, for source code.
-                    ${CMAKE_BINARY_DIR}/include   # for ${LIBMIDI_VERSION_HEADER} and ${LIBMIDI_CONFIG_HEADER} generated files.
+set( LIBMIDI_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include )
+include_directories(${LIBMIDI_INCLUDE_DIR}          # public header files, for source code.
+                    ${CMAKE_BINARY_DIR}/include     # for ${LIBMIDI_VERSION_HEADER} and ${LIBMIDI_CONFIG_HEADER} generated files.
+                    ${CMAKE_SOURCE_DIR}/src/common  # for common files shared by libMidi and unit tests.
 )
 
 ##############################################################################################################################################

@@ -10,7 +10,7 @@ add_library(libmidi
   libMidi.cpp
   instruments.h
   pitches.h
-  varlength.h
+  ${CMAKE_SOURCE_DIR}/src/common/varlength.h
 )
 
 # Force CMAKE_DEBUG_POSTFIX for executables
