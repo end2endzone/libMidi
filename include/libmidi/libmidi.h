@@ -25,8 +25,8 @@
 #ifndef LIBMIDI_H
 #define LIBMIDI_H
 
-#include "libMidi\config.h"
-#include "libMidi\version.h"
+#include "libmidi\config.h"
+#include "libmidi\version.h"
 
 #include <stdint.h>
 #include <vector>

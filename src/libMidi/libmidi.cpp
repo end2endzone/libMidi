@@ -28,7 +28,7 @@
 //   single channel MIDI file.
 //
 
-#include "libMidi/libMidi.h"
+#include "libmidi/libmidi.h"
 #include "varlength.h"
 #include "pitches.h"
 #include "instruments.h"

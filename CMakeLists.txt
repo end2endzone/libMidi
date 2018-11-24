@@ -179,7 +179,7 @@ if (LIBMIDI_BUILD_DOC)
     message("Doxygen build started")
  
     # note the option ALL which allows to build the docs together with the application
-    add_custom_target( libMidi_doc ALL
+    add_custom_target( libmidi_doc ALL
       COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
       COMMENT "Generating API documentation with Doxygen"

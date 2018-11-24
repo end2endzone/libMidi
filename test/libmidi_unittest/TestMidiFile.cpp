@@ -25,7 +25,7 @@
 // TestMidiFile.cpp : Defines the entry point for the console application.
 //
 
-#include "libMidi/libMidi.h"
+#include "libmidi/libmidi.h"
 #include "varlength.h"
 
 #include "rapidassist/gtesthelp.h"
