@@ -29,9 +29,23 @@
 #include "varlength.h"
 
 #include "rapidassist/gtesthelp.h"
+#include "rapidassist/filesystem.h"
+
 #include "TestMidiFile.h"
 
 typedef std::vector<unsigned char> CharSequence;
+
+extern const char * getTestOutputFolder();
+std::string getTestOutputFilePath(const char * name)
+{
+  std::string out;
+  
+  out += getTestOutputFolder();
+  out += ra::filesystem::getPathSeparatorStr();
+  out += name;
+
+  return out;
+}
 
 uint32_t readFileContentAs32bits(const char * iFilePath)
 {
@@ -89,7 +103,7 @@ void TestMidiFile::TearDown()
 
 TEST_F(TestMidiFile, testCDE)
 {
-  static const char * outputFile = "testCDE.output.mid";
+  static const std::string outputFile = getTestOutputFilePath("testCDE.output.mid");
 
   MidiFile f;
   f.setMidiType(MidiFile::MIDI_TYPE_1);
@@ -99,7 +113,7 @@ TEST_F(TestMidiFile, testCDE)
   f.addNote(262, 500); //C4
   f.addNote(294, 500); //D4
   f.addNote(330, 500); //E4
-  bool saved = f.save(outputFile);
+  bool saved = f.save(outputFile.c_str());
   ASSERT_TRUE(saved);
 
   //ASSERTION DISABLED. CDE.MID mixes C4, D4 and E4 notes
@@ -125,7 +139,7 @@ TEST_F(TestMidiFile, testCDE)
 
 TEST_F(TestMidiFile, testMario1Up)
 {
-  static const char * outputFile = "testMario1Up.output.mid";
+  static const std::string outputFile = getTestOutputFilePath("testMario1Up.output.mid");
 
   MidiFile f;
 
@@ -155,16 +169,16 @@ TEST_F(TestMidiFile, testMario1Up)
   f.addNote(1568, 125);
 #endif
 
-  bool saved = f.save(outputFile);
+  bool saved = f.save(outputFile.c_str());
   ASSERT_TRUE(saved);
 
   //ASSERT content is identical
-  ASSERT_TRUE( ra::gtesthelp::isFileEquals(outputFile, "test_files\\mario1up.mid") );
+  ASSERT_TRUE( ra::gtesthelp::isFileEquals(outputFile.c_str(), "test_files\\mario1up.mid") );
 }
 
 TEST_F(TestMidiFile, test1Second)
 {
-  static const char * outputFile = "test1Second.output.mid";
+  static const std::string outputFile = getTestOutputFilePath("test1Second.output.mid");
 
   MidiFile f;
   
@@ -182,16 +196,16 @@ TEST_F(TestMidiFile, test1Second)
 
   f.addNote(131, 1001); // C3 instead of C4 which is 262
 
-  bool saved = f.save(outputFile);
+  bool saved = f.save(outputFile.c_str());
   ASSERT_TRUE(saved);
 
   //ASSERT content is identical
-  ASSERT_TRUE( ra::gtesthelp::isFileEquals(outputFile, "test_files\\1second.mid") );
+  ASSERT_TRUE( ra::gtesthelp::isFileEquals(outputFile.c_str(), "test_files\\1second.mid") );
 }
 
 TEST_F(TestMidiFile, testBuzzer)
 {
-  static const char * outputFile = "testBuzzer.output.mid";
+  static const std::string outputFile = getTestOutputFilePath("testBuzzer.output.mid");
 
   MidiFile f;
   f.setInstrument(0x51);
@@ -204,16 +218,16 @@ TEST_F(TestMidiFile, testBuzzer)
     f.addNote(131, 125); // C3 instead of C4 which is 262
     f.addDelay(125);
   }
-  bool saved = f.save(outputFile);
+  bool saved = f.save(outputFile.c_str());
   ASSERT_TRUE(saved);
 
   //ASSERT content is identical
-  ASSERT_TRUE( ra::gtesthelp::isFileEquals(outputFile, "test_files\\buzzer.mid") );
+  ASSERT_TRUE( ra::gtesthelp::isFileEquals(outputFile.c_str(), "test_files\\buzzer.mid") );
 }
 
 TEST_F(TestMidiFile, testBuzzerWrongFrequencies)
 {
-  static const char * outputFile = "testBuzzer.output.mid";
+  static const std::string outputFile = getTestOutputFilePath("testBuzzer.output.mid");
 
   //test with 2Hz higher than normal note
   {
@@ -228,11 +242,11 @@ TEST_F(TestMidiFile, testBuzzerWrongFrequencies)
       f.addNote(133 /*instead of 131*/, 125);
       f.addDelay(125);
     }
-    bool saved = f.save(outputFile);
+    bool saved = f.save(outputFile.c_str());
     ASSERT_TRUE(saved);
 
     //ASSERT content is identical
-    ASSERT_TRUE( ra::gtesthelp::isFileEquals(outputFile, "test_files\\buzzer.mid") );
+    ASSERT_TRUE( ra::gtesthelp::isFileEquals(outputFile.c_str(), "test_files\\buzzer.mid") );
   }
 
   //test with 2Hz lower than normal note
@@ -248,17 +262,17 @@ TEST_F(TestMidiFile, testBuzzerWrongFrequencies)
       f.addNote(129 /*instead of 131*/, 125);
       f.addDelay(125);
     }
-    bool saved = f.save(outputFile);
+    bool saved = f.save(outputFile.c_str());
     ASSERT_TRUE(saved);
 
     //ASSERT content is identical
-    ASSERT_TRUE( ra::gtesthelp::isFileEquals(outputFile, "test_files\\buzzer.mid") );
+    ASSERT_TRUE( ra::gtesthelp::isFileEquals(outputFile.c_str(), "test_files\\buzzer.mid") );
   }
 }
 
 TEST_F(TestMidiFile, testVolume)
 {
-  static const char * outputFile = "testVolume.output.mid";
+  static const std::string outputFile = getTestOutputFilePath("testVolume.output.mid");
 
   MidiFile f;
   f.setMidiType(MidiFile::MIDI_TYPE_0);
@@ -287,7 +301,7 @@ TEST_F(TestMidiFile, testVolume)
       volume -= volumeStep;
     }
   }
-  bool saved = f.save(outputFile);
+  bool saved = f.save(outputFile.c_str());
   ASSERT_TRUE(saved);
 }
 
@@ -324,11 +338,13 @@ TEST_F(TestMidiFile, testAllInstruments)
 
   for(int8_t i=0; i>=0 && i<=0x7f; i++)
   {
-    char outputFile[80];
-    sprintf(outputFile, "testAllInstruments.%03d (0x%02x).output.mid", ((int)i)+1, i);
+    char outputFileName[80];
+    sprintf(outputFileName, "testAllInstruments.%03d (0x%02x).output.mid", ((int)i)+1, i);
+
+    const std::string outputFile = getTestOutputFilePath(outputFileName);
 
     f.setInstrument(i);
-    bool saved = f.save(outputFile);
+    bool saved = f.save(outputFile.c_str());
     ASSERT_TRUE(saved);
   }
 }
@@ -337,36 +353,36 @@ TEST_F(TestMidiFile, testVariableLength)
 {
   //0
   {
-    static const char * filename = "0.output.bin";
-    FILE * f = fopen(filename, "wb");
+    static const std::string outputFile = getTestOutputFilePath("0.output.bin");
+    FILE * f = fopen(outputFile.c_str(), "wb");
     unsigned int value = 0;
     fwriteVariableLength(value, f);
     fclose(f);
-    CharSequence sequence = readFileContentAsArray(filename);
+    CharSequence sequence = readFileContentAsArray(outputFile.c_str());
     ASSERT_EQ(1, sequence.size());
     ASSERT_EQ(0x00, sequence[0]);
   }
 
   //127
   {
-    static const char * filename = "127.output.bin";
-    FILE * f = fopen(filename, "wb");
+    static const std::string outputFile = getTestOutputFilePath("127.output.bin");
+    FILE * f = fopen(outputFile.c_str(), "wb");
     unsigned int value = 127; // 0x7F
     fwriteVariableLength(value, f);
     fclose(f);
-    CharSequence sequence = readFileContentAsArray(filename);
+    CharSequence sequence = readFileContentAsArray(outputFile.c_str());
     ASSERT_EQ(1, sequence.size());
     ASSERT_EQ(0x7f, sequence[0]);
   }
 
   //255
   {
-    static const char * filename = "255.output.bin";
-    FILE * f = fopen(filename, "wb");
+    static const std::string outputFile = getTestOutputFilePath("255.output.bin");
+    FILE * f = fopen(outputFile.c_str(), "wb");
     unsigned int value = 255; // 0xFF
     fwriteVariableLength(value, f);
     fclose(f);
-    CharSequence sequence = readFileContentAsArray(filename);
+    CharSequence sequence = readFileContentAsArray(outputFile.c_str());
     ASSERT_EQ(2, sequence.size());
     ASSERT_EQ(0x81, sequence[0]);
     ASSERT_EQ(0x7f, sequence[1]);
@@ -374,12 +390,12 @@ TEST_F(TestMidiFile, testVariableLength)
 
   //32768
   {
-    static const char * filename = "32768.output.bin";
-    FILE * f = fopen(filename, "wb");
+    static const std::string outputFile = getTestOutputFilePath("32768.output.bin");
+    FILE * f = fopen(outputFile.c_str(), "wb");
     unsigned int value = 32768; // 0x8000
     fwriteVariableLength(value, f);
     fclose(f);
-    CharSequence sequence = readFileContentAsArray(filename);
+    CharSequence sequence = readFileContentAsArray(outputFile.c_str());
     ASSERT_EQ(3, sequence.size());
     ASSERT_EQ(0x82, sequence[0]);
     ASSERT_EQ(0x80, sequence[1]);

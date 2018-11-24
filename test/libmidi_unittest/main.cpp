@@ -28,11 +28,28 @@
 #include <gtest/gtest.h>
 
 #include "rapidassist/gtesthelp.h"
+#include "rapidassist/filesystem.h"
 
 using namespace ra::gtesthelp;
 
+const char * getTestOutputFolder()
+{
+  return "test_out";
+}
+
 int main(int argc, char **argv)
 {
+  //create output folder
+  if (!ra::filesystem::folderExists(getTestOutputFolder()))
+  {
+    bool created = ra::filesystem::createFolder(getTestOutputFolder());
+    if (!created)
+    {
+      printf("Failed creating test output folder '%s'.\n", getTestOutputFolder() );
+      return 1;
+    }
+  }
+
   //define default values for xml output report
   if (isProcessorX86())
   {
