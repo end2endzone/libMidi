@@ -546,7 +546,7 @@ bool MidiFile::save(const char * iFile)
   if (mInstrument != DEFAULT_INSTRUMENT)
   {
     //Next to all TEMPO EVENT is the following 3 bytes which are still unknown
-    unsigned char buffer[] = {0x00, 0xC0, mInstrument};
+    unsigned char buffer[] = {0x00, 0xC0, (unsigned char)mInstrument};
     track.length += fwrite(buffer, 1, sizeof(buffer), fout);
   }
 

@@ -25,8 +25,8 @@
 #ifndef LIBMIDI_H
 #define LIBMIDI_H
 
-#include "libmidi\config.h"
-#include "libmidi\version.h"
+#include "libmidi/config.h"
+#include "libmidi/version.h"
 
 #include <stdint.h>
 #include <vector>
@@ -38,10 +38,18 @@
 class LIBMIDI_EXPORT MidiFile {
 public:
   /// <summary>
-  /// Predeclarations
+  /// enum values
   /// </summary>
-  enum TRACK_ENDING_PREFERENCE;
-  enum MIDI_TYPE;
+  enum TRACK_ENDING_PREFERENCE
+  {
+    STOP_PREVIOUS_NOTE = 1,
+    STOP_ALL_NOTES = 2,
+  };
+  enum MIDI_TYPE
+  {
+    MIDI_TYPE_0 = 0,
+    MIDI_TYPE_1 = 1
+  };
 
   /// <summary>
   /// Construct a new instance of MidiFile.
@@ -114,16 +122,6 @@ public:
   static const uint32_t DEFAULT_TEMPO = 500000;
   static const uint32_t DEFAULT_TICKS_PER_QUARTER_NOTE = 480;
   static const uint32_t MIN2USEC = 60*1000*1000;
-  enum TRACK_ENDING_PREFERENCE
-  {
-    STOP_PREVIOUS_NOTE = 1,
-    STOP_ALL_NOTES = 2,
-  };
-  enum MIDI_TYPE
-  {
-    MIDI_TYPE_0 = 0,
-    MIDI_TYPE_1 = 1
-  };
 
 public:
   //static methods

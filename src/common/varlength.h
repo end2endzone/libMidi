@@ -25,6 +25,8 @@
 #ifndef VARIABLE_LENGTH_H
 #define VARIABLE_LENGTH_H
 
+#include <cstring> //for memset()
+
 /// <summary>
 /// Computes a 32-bits mask for reading the nth block of 7 bits long.
 /// </summary>
