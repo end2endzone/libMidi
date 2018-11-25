@@ -26,6 +26,8 @@
 #define VARIABLE_LENGTH_H
 
 #include <cstring> //for memset()
+#include <cstdio> //for fwrite(), fopen(), ftell(), fclose()
+#include <cstdlib> //for abs()
 
 /// <summary>
 /// Computes a 32-bits mask for reading the nth block of 7 bits long.
