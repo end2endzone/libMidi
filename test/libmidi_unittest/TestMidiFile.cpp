@@ -58,10 +58,11 @@ uint32_t readFileContentAs32bits(const char * iFilePath)
     return 0;
   }
 
-  fread(&buffer[0], 1, 1, f);
-  fread(&buffer[1], 1, 1, f);
-  fread(&buffer[2], 1, 1, f);
-  fread(&buffer[3], 1, 1, f);
+  size_t nRead = 0;
+  nRead = fread(&buffer[0], 1, 1, f);
+  nRead = fread(&buffer[1], 1, 1, f);
+  nRead = fread(&buffer[2], 1, 1, f);
+  nRead = fread(&buffer[3], 1, 1, f);
 
   fclose(f);
 
