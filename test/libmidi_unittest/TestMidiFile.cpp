@@ -35,7 +35,18 @@
 
 typedef std::vector<unsigned char> CharSequence;
 
+extern const char * getTestInputFolder();
 extern const char * getTestOutputFolder();
+std::string getTestInputFilePath(const char * name)
+{
+  std::string out;
+  
+  out += getTestInputFolder();
+  out += ra::filesystem::getPathSeparatorStr();
+  out += name;
+
+  return out;
+}
 std::string getTestOutputFilePath(const char * name)
 {
   std::string out;
@@ -122,7 +133,7 @@ TEST_F(TestMidiFile, testCDE)
 #if 0
   //ASSERT content is **almost** identical
   CharSequence actualFileContent   = readFileContentAsArray(outputFile);
-  CharSequence expectedFileContent = readFileContentAsArray("test_files\\cde1.mid");
+  CharSequence expectedFileContent = readFileContentAsArray(getTestInputFilePath("cde1.mid").c_str());
   
   //expecting file are equals expect that for event for base file uses 0x8000 instead of 00 for timestamp (which is the same)
   actualFileContent.insert(actualFileContent.begin()+22, 0x80);
@@ -175,7 +186,7 @@ TEST_F(TestMidiFile, testMario1Up)
 
   //ASSERT content is identical
   std::string differences;
-  bool identical = ra::gtesthelp::isFileEquals(outputFile.c_str(), "test_files\\mario1up.mid", differences);
+  bool identical = ra::gtesthelp::isFileEquals(outputFile.c_str(), getTestInputFilePath("mario1up.mid").c_str(), differences);
   ASSERT_TRUE( identical ) << differences;
 }
 
@@ -204,7 +215,7 @@ TEST_F(TestMidiFile, test1Second)
 
   //ASSERT content is identical
   std::string differences;
-  bool identical = ra::gtesthelp::isFileEquals(outputFile.c_str(), "test_files\\1second.mid", differences);
+  bool identical = ra::gtesthelp::isFileEquals(outputFile.c_str(), getTestInputFilePath("1second.mid").c_str(), differences);
   ASSERT_TRUE( identical ) << differences;
 }
 
@@ -228,7 +239,7 @@ TEST_F(TestMidiFile, testBuzzer)
 
   //ASSERT content is identical
   std::string differences;
-  bool identical = ra::gtesthelp::isFileEquals(outputFile.c_str(), "test_files\\buzzer.mid", differences);
+  bool identical = ra::gtesthelp::isFileEquals(outputFile.c_str(), getTestInputFilePath("buzzer.mid").c_str(), differences);
   ASSERT_TRUE( identical ) << differences;
 }
 
@@ -254,7 +265,7 @@ TEST_F(TestMidiFile, testBuzzerWrongFrequencies)
 
     //ASSERT content is identical
     std::string differences;
-    bool identical = ra::gtesthelp::isFileEquals(outputFile.c_str(), "test_files\\buzzer.mid", differences);
+    bool identical = ra::gtesthelp::isFileEquals(outputFile.c_str(), getTestInputFilePath("buzzer.mid").c_str(), differences);
     ASSERT_TRUE( identical ) << differences;
   }
 
@@ -276,7 +287,7 @@ TEST_F(TestMidiFile, testBuzzerWrongFrequencies)
 
     //ASSERT content is identical
     std::string differences;
-    bool identical = ra::gtesthelp::isFileEquals(outputFile.c_str(), "test_files\\buzzer.mid", differences);
+    bool identical = ra::gtesthelp::isFileEquals(outputFile.c_str(), getTestInputFilePath("buzzer.mid").c_str(), differences);
     ASSERT_TRUE( identical ) << differences;
   }
 }

@@ -32,6 +32,10 @@
 
 using namespace ra::gtesthelp;
 
+const char * getTestInputFolder()
+{
+  return "test_files";
+}
 const char * getTestOutputFolder()
 {
   return "test_out";
@@ -39,6 +43,13 @@ const char * getTestOutputFolder()
 
 int main(int argc, char **argv)
 {
+  //check input folder
+  if (!ra::filesystem::folderExists(getTestInputFolder()))
+  {
+    printf("Input test folder not found: '%s'.\n", getTestInputFolder() );
+    return 1;
+  }
+
   //create output folder
   if (!ra::filesystem::folderExists(getTestOutputFolder()))
   {
@@ -46,7 +57,7 @@ int main(int argc, char **argv)
     if (!created)
     {
       printf("Failed creating test output folder '%s'.\n", getTestOutputFolder() );
-      return 1;
+      return 2;
     }
   }
 
