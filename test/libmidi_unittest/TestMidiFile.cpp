@@ -174,7 +174,9 @@ TEST_F(TestMidiFile, testMario1Up)
   ASSERT_TRUE(saved);
 
   //ASSERT content is identical
-  ASSERT_TRUE( ra::gtesthelp::isFileEquals(outputFile.c_str(), "test_files\\mario1up.mid") );
+  std::string differences;
+  bool identical = ra::gtesthelp::isFileEquals(outputFile.c_str(), "test_files\\mario1up.mid", differences);
+  ASSERT_TRUE( identical ) << differences;
 }
 
 TEST_F(TestMidiFile, test1Second)
@@ -201,7 +203,9 @@ TEST_F(TestMidiFile, test1Second)
   ASSERT_TRUE(saved);
 
   //ASSERT content is identical
-  ASSERT_TRUE( ra::gtesthelp::isFileEquals(outputFile.c_str(), "test_files\\1second.mid") );
+  std::string differences;
+  bool identical = ra::gtesthelp::isFileEquals(outputFile.c_str(), "test_files\\1second.mid", differences);
+  ASSERT_TRUE( identical ) << differences;
 }
 
 TEST_F(TestMidiFile, testBuzzer)
@@ -223,7 +227,9 @@ TEST_F(TestMidiFile, testBuzzer)
   ASSERT_TRUE(saved);
 
   //ASSERT content is identical
-  ASSERT_TRUE( ra::gtesthelp::isFileEquals(outputFile.c_str(), "test_files\\buzzer.mid") );
+  std::string differences;
+  bool identical = ra::gtesthelp::isFileEquals(outputFile.c_str(), "test_files\\buzzer.mid", differences);
+  ASSERT_TRUE( identical ) << differences;
 }
 
 TEST_F(TestMidiFile, testBuzzerWrongFrequencies)
@@ -247,7 +253,9 @@ TEST_F(TestMidiFile, testBuzzerWrongFrequencies)
     ASSERT_TRUE(saved);
 
     //ASSERT content is identical
-    ASSERT_TRUE( ra::gtesthelp::isFileEquals(outputFile.c_str(), "test_files\\buzzer.mid") );
+    std::string differences;
+    bool identical = ra::gtesthelp::isFileEquals(outputFile.c_str(), "test_files\\buzzer.mid", differences);
+    ASSERT_TRUE( identical ) << differences;
   }
 
   //test with 2Hz lower than normal note
@@ -267,7 +275,9 @@ TEST_F(TestMidiFile, testBuzzerWrongFrequencies)
     ASSERT_TRUE(saved);
 
     //ASSERT content is identical
-    ASSERT_TRUE( ra::gtesthelp::isFileEquals(outputFile.c_str(), "test_files\\buzzer.mid") );
+    std::string differences;
+    bool identical = ra::gtesthelp::isFileEquals(outputFile.c_str(), "test_files\\buzzer.mid", differences);
+    ASSERT_TRUE( identical ) << differences;
   }
 }
 
