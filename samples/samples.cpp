@@ -26,6 +26,9 @@
 #include <iostream>
 
 #include "libmidi/libmidi.h"
+#include "rapidassist/random.h"
+
+using namespace ra::random;
 
 int demo_mario1up(int argc, char **argv)
 {
@@ -56,11 +59,52 @@ int demo_mario1up(int argc, char **argv)
   return 0;
 }
 
+int demo_piano(int argc, char **argv)
+{
+  //find all piano instruments
+  std::vector<std::string> piano_instruments;
+  for(int8_t i=0; i<=127 && i >= 0; i++)
+  {
+    std::string name = MidiFile::getInstrumentName(i);
+    if (name.find("Piano") != std::string::npos)
+      piano_instruments.push_back(name);
+  }
+
+  //find a random piano instrument.
+  int num_instruments = (int)piano_instruments.size();
+  int selection = getRandomInt(0, num_instruments-1);
+  const char * selected_piano_instrument = piano_instruments[selection].c_str();
+
+  //create the melody
+  MidiFile f;
+
+  f.setInstrument(MidiFile::findInstrument(selected_piano_instrument));
+  f.setTicksPerQuarterNote(0x80);
+  f.setTrackEndingPreference(MidiFile::STOP_ALL_NOTES);
+  f.addNote(262, 500); //C4
+  f.addNote(294, 500); //D4
+  f.addNote(330, 500); //E4
+
+  const char * filename = "piano.mid";
+  bool saved = f.save(filename);
+  if (!saved)
+  {
+    printf("Failed saving MIDI to file '%s'.\n", filename);
+    return 1;
+  }
+
+  return 0;
+}
+
 int main(int argc, char **argv)
 {
   int return_code = 0;
 
   return_code = demo_mario1up(argc, argv);
+  if (return_code != 0)
+    return return_code;
+
+  return_code = demo_piano(argc, argv);
   if (return_code != 0)
     return return_code;
 
