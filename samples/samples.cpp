@@ -37,7 +37,6 @@ int demo_create_mario_1up(int argc, char **argv)
   f.setInstrument(0x51);  // "Lead 2 (sawtooth)"
   f.setTempo(0x051615);   // 333333 microseconds per quarter note
   f.setName("mario1up");
-  f.setVolume(0x64);      // 100%
  
   //play mario 1-up melody.
   f.addNote(1319, 125); // E6
