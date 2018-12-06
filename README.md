@@ -68,25 +68,68 @@ The following example shows how to create a MIDI from multiple tones (frequency 
 This example creates the Nintendo's Mario Bros. 1-up sound in MIDI file format.
 
 ```cpp
-int create_mario_1up_midi()
+int create_mario_1up()
 {
   MidiFile f;
  
-  f.setMidiType(MidiFile::MIDI_TYPE_0);
   f.setInstrument(0x51);  // "Lead 2 (sawtooth)"
   f.setTempo(0x051615);   // 333333 microseconds per quarter note
   f.setName("mario1up");
   f.setVolume(0x64);      // 100%
  
   //play mario 1-up melody.
-  f.addNote(1319,125);  // E6
-  f.addNote(1568,125);  // G6
-  f.addNote(2637,125);  // E7
-  f.addNote(2093,125);  // C7
-  f.addNote(2349,125);  // D7
-  f.addNote(3136,125);  // G7
+  f.addNote(1319, 125); // E6
+  f.addNote(1568, 125); // G6
+  f.addNote(2637, 125); // E7
+  f.addNote(2093, 125); // C7
+  f.addNote(2349, 125); // D7
+  f.addNote(3136, 125); // G7
  
   const char * filename = "mario1up.mid";
+  bool saved = f.save(filename);
+  if (!saved)
+  {
+    printf("Failed saving MIDI to file '%s'.\n", filename);
+    return 1;
+  }
+
+  return 0;
+}
+```
+
+
+
+## Play with instruments ##
+
+The following example select a random piano instrument and play a melody.
+
+```cpp
+int play_random_piano()
+{
+  //find all piano instruments
+  std::vector<std::string> piano_instruments;
+  for(int8_t i=0; i<=127 && i >= 0; i++)
+  {
+    std::string name = MidiFile::getInstrumentName(i);
+    if (name.find("Piano") != std::string::npos)
+      piano_instruments.push_back(name);
+  }
+
+  //pick a random piano instrument.
+  int num_instruments = (int)piano_instruments.size();
+  int selection = getRandomInt(0, num_instruments-1);
+  const char * selected_piano_instrument = piano_instruments[selection].c_str();
+
+  //create the melody
+  MidiFile f;
+
+  f.setInstrument(MidiFile::findInstrument(selected_piano_instrument));
+  f.setTicksPerQuarterNote(0x80);
+  f.addNote(262, 500); // C4
+  f.addNote(294, 500); // D4
+  f.addNote(330, 500); // E4
+
+  const char * filename = "piano.mid";
   bool saved = f.save(filename);
   if (!saved)
   {

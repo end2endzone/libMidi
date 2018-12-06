@@ -30,23 +30,22 @@
 
 using namespace ra::random;
 
-int demo_mario1up(int argc, char **argv)
+int demo_create_mario_1up(int argc, char **argv)
 {
   MidiFile f;
  
-  f.setMidiType(MidiFile::MIDI_TYPE_0);
   f.setInstrument(0x51);  // "Lead 2 (sawtooth)"
   f.setTempo(0x051615);   // 333333 microseconds per quarter note
   f.setName("mario1up");
   f.setVolume(0x64);      // 100%
  
   //play mario 1-up melody.
-  f.addNote(1319,125);  // E6
-  f.addNote(1568,125);  // G6
-  f.addNote(2637,125);  // E7
-  f.addNote(2093,125);  // C7
-  f.addNote(2349,125);  // D7
-  f.addNote(3136,125);  // G7
+  f.addNote(1319, 125); // E6
+  f.addNote(1568, 125); // G6
+  f.addNote(2637, 125); // E7
+  f.addNote(2093, 125); // C7
+  f.addNote(2349, 125); // D7
+  f.addNote(3136, 125); // G7
  
   const char * filename = "mario1up.mid";
   bool saved = f.save(filename);
@@ -59,7 +58,7 @@ int demo_mario1up(int argc, char **argv)
   return 0;
 }
 
-int demo_piano(int argc, char **argv)
+int demo_play_random_piano(int argc, char **argv)
 {
   //find all piano instruments
   std::vector<std::string> piano_instruments;
@@ -70,7 +69,7 @@ int demo_piano(int argc, char **argv)
       piano_instruments.push_back(name);
   }
 
-  //find a random piano instrument.
+  //pick a random piano instrument.
   int num_instruments = (int)piano_instruments.size();
   int selection = getRandomInt(0, num_instruments-1);
   const char * selected_piano_instrument = piano_instruments[selection].c_str();
@@ -80,10 +79,9 @@ int demo_piano(int argc, char **argv)
 
   f.setInstrument(MidiFile::findInstrument(selected_piano_instrument));
   f.setTicksPerQuarterNote(0x80);
-  f.setTrackEndingPreference(MidiFile::STOP_ALL_NOTES);
-  f.addNote(262, 500); //C4
-  f.addNote(294, 500); //D4
-  f.addNote(330, 500); //E4
+  f.addNote(262, 500); // C4
+  f.addNote(294, 500); // D4
+  f.addNote(330, 500); // E4
 
   const char * filename = "piano.mid";
   bool saved = f.save(filename);
@@ -100,11 +98,13 @@ int main(int argc, char **argv)
 {
   int return_code = 0;
 
-  return_code = demo_mario1up(argc, argv);
+  //create_mario_1up
+  return_code = demo_create_mario_1up(argc, argv);
   if (return_code != 0)
     return return_code;
 
-  return_code = demo_piano(argc, argv);
+  //play_random_piano
+  return_code = demo_play_random_piano(argc, argv);
   if (return_code != 0)
     return return_code;
 
