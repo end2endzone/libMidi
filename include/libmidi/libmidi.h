@@ -38,23 +38,31 @@
 class LIBMIDI_EXPORT MidiFile {
 public:
   /// <summary>
-  /// enum values
+  /// Defines track ending strategies
   /// </summary>
   enum TRACK_ENDING_PREFERENCE
   {
+    /// <summary>Stop the previous playing note. Default value.</summary>
     STOP_PREVIOUS_NOTE = 1,
+    /// <summary>Stop all playing notes.</summary>
     STOP_ALL_NOTES = 2,
   };
+
+  /// <summary>
+  /// Defines midi type or track type
+  /// </summary>
   enum MIDI_TYPE
   {
+    /// <summary>Type 0. Default value.</summary>
     MIDI_TYPE_0 = 0,
+    /// <summary>Type 1.</summary>
     MIDI_TYPE_1 = 1
   };
 
   /// <summary>
   /// Construct a new instance of MidiFile.
   /// </summary>
-	MidiFile(void);
+  MidiFile(void);
 
   /// <summary>
   /// Sets the type of MIDI file.

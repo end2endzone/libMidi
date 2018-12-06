@@ -308,7 +308,7 @@ MidiFile::MidiFile()
 {
   mTicksPerQuarterNote = MidiFile::DEFAULT_TICKS_PER_QUARTER_NOTE;
   mTempo = MidiFile::DEFAULT_TEMPO;
-  mVolume = 0x7f;
+  mVolume = MAX_VOLUME;
   mInstrument = DEFAULT_INSTRUMENT;
   mTrackEndingPreference = STOP_PREVIOUS_NOTE;
   mType = MIDI_TYPE_0;
