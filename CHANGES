@@ -1,0 +1,12 @@
+Changes for 1.1.0:
+
+* New Feature: Added CMake support.
+* New Feature: Modified code to support Windows and Linux.
+* New Feature: Implemented support for AppVeyor and Travis CI.
+* New Feature: Using googletest and RapidAssist dependencies.
+
+Changes for 1.0.0
+
+* First public release.
+* Originally released on http://www.end2endzone.com/libmidi-a-c-open-source-library-for-generating-single-tone-melodies-in-midi-format
+* License modified from LGPL v3.0 to MIT.
