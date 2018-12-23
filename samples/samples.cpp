@@ -26,6 +26,7 @@
 #include <iostream>
 
 #include "libmidi/libmidi.h"
+#include "libmidi/pitches.h"
 #include "rapidassist/random.h"
 
 using namespace ra::random;
@@ -39,12 +40,12 @@ int demo_create_mario_1up(int argc, char **argv)
   f.setName("mario1up");
  
   //play mario 1-up melody.
-  f.addNote(1319, 125); // E6
-  f.addNote(1568, 125); // G6
-  f.addNote(2637, 125); // E7
-  f.addNote(2093, 125); // C7
-  f.addNote(2349, 125); // D7
-  f.addNote(3136, 125); // G7
+  f.addNote(NOTE_E6, 125);
+  f.addNote(NOTE_G6, 125);
+  f.addNote(NOTE_E7, 125);
+  f.addNote(NOTE_C7, 125);
+  f.addNote(NOTE_D7, 125);
+  f.addNote(NOTE_G7, 125);
  
   const char * filename = "mario1up.mid";
   bool saved = f.save(filename);
@@ -78,9 +79,9 @@ int demo_play_random_piano(int argc, char **argv)
 
   f.setInstrument(MidiFile::findInstrument(selected_piano_instrument));
   f.setTicksPerQuarterNote(0x80);
-  f.addNote(262, 500); // C4
-  f.addNote(294, 500); // D4
-  f.addNote(330, 500); // E4
+  f.addNote(NOTE_C4, 500);
+  f.addNote(NOTE_D4, 500);
+  f.addNote(NOTE_E4, 500);
 
   const char * filename = "piano.mid";
   bool saved = f.save(filename);
