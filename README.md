@@ -77,12 +77,12 @@ int create_mario_1up()
   f.setName("mario1up");
  
   //play mario 1-up melody.
-  f.addNote(NOTE_E6, 125);
-  f.addNote(NOTE_G6, 125);
-  f.addNote(NOTE_E7, 125);
-  f.addNote(NOTE_C7, 125);
-  f.addNote(NOTE_D7, 125);
-  f.addNote(NOTE_G7, 125);
+  f.addNote(NOTE_E6, 125); // 1319 Hz
+  f.addNote(NOTE_G6, 125); // 1568 Hz
+  f.addNote(NOTE_E7, 125); // 2637 Hz
+  f.addNote(NOTE_C7, 125); // 2093 Hz
+  f.addNote(NOTE_D7, 125); // 2349 Hz
+  f.addNote(NOTE_G7, 125); // 3136 Hz
  
   const char * filename = "mario1up.mid";
   bool saved = f.save(filename);
@@ -124,9 +124,9 @@ int play_random_piano()
 
   f.setInstrument(MidiFile::findInstrument(selected_piano_instrument));
   f.setTicksPerQuarterNote(0x80);
-  f.addNote(NOTE_C4, 500);
-  f.addNote(NOTE_D4, 500);
-  f.addNote(NOTE_E4, 500);
+  f.addNote(NOTE_C4, 500); // 262 Hz
+  f.addNote(NOTE_D4, 500); // 294 Hz
+  f.addNote(NOTE_E4, 500); // 330 Hz
 
   const char * filename = "piano.mid";
   bool saved = f.save(filename);
