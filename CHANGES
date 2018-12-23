@@ -1,7 +1,6 @@
 Changes for 1.2.0:
 
-* New Feature: N/A
-* Fixed issue #x : N/A
+* Fixed issue #2 : Moved 'instruments.h' and 'pitches.h' files to public include directory.
 
 Changes for 1.1.0:
 
