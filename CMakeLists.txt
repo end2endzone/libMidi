@@ -61,8 +61,8 @@ MESSAGE( STATUS "CMAKE_SYSTEM_PROCESSOR:   " ${CMAKE_SYSTEM_PROCESSOR} )
 ##############################################################################################################################################
 
 # Product version according to Semantic Versioning v2.0.0 https://semver.org/
-SET(LIBMIDI_VERSION_MAJOR 1)
-SET(LIBMIDI_VERSION_MINOR 2)
+SET(LIBMIDI_VERSION_MAJOR 2)
+SET(LIBMIDI_VERSION_MINOR 0)
 SET(LIBMIDI_VERSION_PATCH 0)
 set(LIBMIDI_VERSION ${LIBMIDI_VERSION_MAJOR}.${LIBMIDI_VERSION_MINOR}.${LIBMIDI_VERSION_PATCH})
 
