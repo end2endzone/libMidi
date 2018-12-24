@@ -3,6 +3,8 @@ add_executable(libmidi_unittest
   ${LIBMIDI_VERSION_HEADER}
   ${LIBMIDI_CONFIG_HEADER}
   main.cpp
+  TestInstruments.cpp
+  TestInstruments.h
   TestMidiFile.cpp
   TestMidiFile.h
   TestNotes.cpp

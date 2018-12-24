@@ -77,10 +77,6 @@ static const META_TYPE META_SEQUENCER_SPECIFIC_EVENT       = (META_TYPE)0x7F;
 
 typedef uint32_t VAR_LENGTH;
 
-typedef int8_t INSTRUMENT;
-static const INSTRUMENT MIN_INSTRUMENT = (INSTRUMENT)0x00;
-static const INSTRUMENT MAX_INSTRUMENT = (INSTRUMENT)0x7F;
-
 #pragma pack(push, 1) // exact fit - no padding
 struct MIDI_HEADER
 {
@@ -454,27 +450,6 @@ uint16_t MidiFile::ticks2duration(uint16_t iTicks, uint16_t iTicksPerQuarterNote
   //formula: noteticks/mTicksPerQuarterNote*tempo/1000=notedurationMs
   uint32_t durationMs = (iTicks*iTempo)/(1000*iTicks);
   return (uint16_t)durationMs;
-}
-
-int8_t MidiFile::findInstrument(const char * iName)
-{
-  if (iName == NULL)
-    return DEFAULT_INSTRUMENT;
-  std::string name = iName;
-  for(INSTRUMENT i=MIN_INSTRUMENT; i>=MIN_INSTRUMENT && i<=MAX_INSTRUMENT; i++)
-  {
-    const char * currentName = gInstruments[i];
-    if (name == currentName)
-      return i;
-  }
-  return DEFAULT_INSTRUMENT;
-}
-
-const char * MidiFile::getInstrumentName(int8_t iInstrument)
-{
-  if (iInstrument < MIN_INSTRUMENT || iInstrument > MAX_INSTRUMENT)
-    return gInstruments[DEFAULT_INSTRUMENT];
-  return gInstruments[iInstrument];
 }
 
 uint16_t MidiFile::duration2ticks(uint16_t iDurationMs)

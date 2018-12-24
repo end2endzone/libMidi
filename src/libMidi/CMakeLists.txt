@@ -12,6 +12,7 @@ add_library(libmidi
   ${LIBMIDI_CONFIG_HEADER}
   libmidi.cpp
   notes.cpp
+  instruments.cpp
   ${CMAKE_SOURCE_DIR}/src/common/varlength.h
 )
 

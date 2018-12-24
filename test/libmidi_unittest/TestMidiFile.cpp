@@ -328,24 +328,6 @@ TEST_F(TestMidiFile, testVolume)
   ASSERT_TRUE(saved);
 }
 
-TEST_F(TestMidiFile, testFindInstrument)
-{
-  ASSERT_EQ(0x00, MidiFile::findInstrument("") );
-  ASSERT_EQ(0x00, MidiFile::findInstrument(NULL) );
-  ASSERT_EQ(0x00, MidiFile::findInstrument("Acoustic Grand Piano") );
-  ASSERT_EQ(0x01, MidiFile::findInstrument("Bright Acoustic Piano") );
-  ASSERT_EQ(0x7f, MidiFile::findInstrument("Gunshot") );
-}
-
-TEST_F(TestMidiFile, testGetInstrumentName)
-{
-  ASSERT_TRUE( std::string("Acoustic Grand Piano") == MidiFile::getInstrumentName(0x00) );
-  ASSERT_TRUE( std::string("Acoustic Grand Piano") == MidiFile::getInstrumentName(-1) );
-  ASSERT_TRUE( std::string("Bright Acoustic Piano") == MidiFile::getInstrumentName(0x01) );
-  ASSERT_TRUE( std::string("Gunshot") == MidiFile::getInstrumentName(0x7f) );
-  ASSERT_TRUE( std::string("Acoustic Grand Piano") == MidiFile::getInstrumentName((char)0xff) );
-}
-
 TEST_F(TestMidiFile, testAllInstruments)
 {
   MidiFile f;

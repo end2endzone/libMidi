@@ -158,18 +158,6 @@ public:
   /// <returns>A duration in milliseconds matching the given number of ticks.</returns>
   static uint16_t ticks2duration(uint16_t iTicks, uint16_t iTicksPerQuarterNote, uint32_t iTempo);
 
-  /// <summary>Finds a MIDI intrument id by name.</summary>
-  /// <param name="iName">The given name of the intrument.</param>
-  /// <returns>An identifier that matches the given instrument name.
-  /// Returns a default instrument id if the name is unknown, NULL, or empty.
-  /// </returns>
-  static int8_t findInstrument(const char * iName);
-
-  /// <summary>Get the instrument name that matches the given intrument id.</summary>
-  /// <param name="iInstrument">The instrument id to search for.</param>
-  /// <returns>Returns the instrument name matching the given id. Returns the name of the default instrument on invalid intrument id.</returns>
-  static const char * getInstrumentName(int8_t iInstrument);
-
 private:
   //private methods
 

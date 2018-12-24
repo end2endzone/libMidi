@@ -27,6 +27,7 @@
 
 #include "libmidi/libmidi.h"
 #include "libmidi/pitches.h"
+#include "libmidi/instruments.h"
 #include "rapidassist/random.h"
 
 using namespace ra::random;
@@ -64,7 +65,7 @@ int demo_play_random_piano(int argc, char **argv)
   std::vector<std::string> piano_instruments;
   for(int8_t i=0; i<=127 && i >= 0; i++)
   {
-    std::string name = MidiFile::getInstrumentName(i);
+    std::string name = getInstrumentName(i);
     if (name.find("Piano") != std::string::npos)
       piano_instruments.push_back(name);
   }
@@ -77,7 +78,7 @@ int demo_play_random_piano(int argc, char **argv)
   //create the melody
   MidiFile f;
 
-  f.setInstrument(MidiFile::findInstrument(selected_piano_instrument));
+  f.setInstrument(findInstrument(selected_piano_instrument));
   f.setTicksPerQuarterNote(0x80);
   f.addNote(NOTE_C4, 500); // 262 Hz
   f.addNote(NOTE_D4, 500); // 294 Hz
