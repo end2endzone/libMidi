@@ -29,7 +29,9 @@
 
 #include "libmidi/notes.h"
 #include "libmidi/pitches.h"
-#include <string> //for NULL
+
+#include <cstdlib>  //for abs()
+#include <string>   //for NULL
 
 struct NOTEDEF
 {
