@@ -1,7 +1,7 @@
 Changes for 1.2.0:
 
 * Fixed issue #2 : Moved 'instruments.h' and 'pitches.h' files to public include directory.
-* Fixed issue #4 : Create note finding functions (Partial fix).
+* Fixed issue #4 : Create note finding functions.
 
 Changes for 1.1.0:
 
