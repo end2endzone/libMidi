@@ -178,7 +178,7 @@ public:
   static int findNoteFrequency(const char * iName);
 
   /// <summary>Get the note name that matches the given frequency.</summary>
-  /// <param name="iFreq">The frequency in Hz to search for.</param>
+  /// <param name="iFreq">The frequency in Hz to search for. The frequency must match an exact note.</param>
   /// <returns>Returns the note name matching the frequency. Returns NULL on invalid frequency.</returns>
   static const char * getNoteName(int iFreq);
 
