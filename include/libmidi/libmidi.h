@@ -182,6 +182,12 @@ public:
   /// <returns>Returns the note name matching the frequency. Returns NULL on invalid frequency.</returns>
   static const char * getNoteName(int iFreq);
 
+  /// <summary>Get the note name that 'best' matches the given frequency.</summary>
+  /// <param name="iFreq">The frequency in Hz to search for.</param>
+  /// <param name="iEpsilon">The epsilon value for tolerance.</param>
+  /// <returns>Returns the note name matching the frequency. Returns NULL when no note matches the given frequency.</returns>
+  static const char * getNoteName(int iFreq, int iEpsilon);
+
 private:
   //private methods
 

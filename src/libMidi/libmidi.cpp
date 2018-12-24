@@ -31,6 +31,7 @@
 #include "libmidi/libmidi.h"
 #include "libmidi/pitches.h"
 #include "libmidi/instruments.h"
+
 #include "varlength.h"
 
 typedef uint32_t HEADER_ID;
@@ -705,6 +706,38 @@ const char * MidiFile::getNoteName(int iFreq)
       return note.name;
   }
   return NULL;
+}
+
+const char * MidiFile::getNoteName(int iFreq, int iEpsilon)
+{
+  const char * best_name = NULL;
+  int best_frequency = -1;
+  int best_diff = -1;
+
+  if (iFreq < 0)
+    return NULL;
+  for(size_t i=0; i<gNotesDefinitionCount; i++)
+  {
+    const NOTEDEF & note = gNotesDefinition[i];
+    int diff = abs(note.freq - iFreq);
+    if (diff <= iEpsilon)
+    {
+      //that is a good candidate
+
+      if (best_name == NULL || best_diff > diff)
+      {
+        //that is a better candidate that previous 'best'.
+        best_name = note.name;
+        best_diff = diff;
+        best_frequency = note.freq;
+      }
+    }
+
+    //if a perfect match
+    if (iFreq == note.freq)
+      return note.name;
+  }
+  return best_name;
 }
 
 uint16_t MidiFile::duration2ticks(uint16_t iDurationMs)
