@@ -1,5 +1,6 @@
 set(LIBMIDI_HEADER_FILES ""
   ${LIBMIDI_INCLUDE_DIR}/libmidi/libmidi.h
+  ${LIBMIDI_INCLUDE_DIR}/libmidi/notes.h
   ${LIBMIDI_INCLUDE_DIR}/libmidi/pitches.h
   ${LIBMIDI_INCLUDE_DIR}/libmidi/instruments.h
 )
@@ -10,6 +11,7 @@ add_library(libmidi
   ${LIBMIDI_VERSION_HEADER}
   ${LIBMIDI_CONFIG_HEADER}
   libmidi.cpp
+  notes.cpp
   ${CMAKE_SOURCE_DIR}/src/common/varlength.h
 )
 

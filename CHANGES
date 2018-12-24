@@ -1,3 +1,7 @@
+Changes for 2.0.0:
+
+* Partially fixed issue #6 : Move instruments and notes 'find' and getter functions outside of MidiFile.
+
 Changes for 1.2.0:
 
 * Fixed issue #2 : Moved 'instruments.h' and 'pitches.h' files to public include directory.

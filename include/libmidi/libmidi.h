@@ -170,24 +170,6 @@ public:
   /// <returns>Returns the instrument name matching the given id. Returns the name of the default instrument on invalid intrument id.</returns>
   static const char * getInstrumentName(int8_t iInstrument);
 
-  /// <summary>Finds a note frequency by name.</summary>
-  /// <param name="iName">The given name of the note.</param>
-  /// <returns>An identifier that matches the given note name.
-  /// Returns -1 if the name is unknown, NULL, or empty.
-  /// </returns>
-  static int findNoteFrequency(const char * iName);
-
-  /// <summary>Get the note name that matches the given frequency.</summary>
-  /// <param name="iFreq">The frequency in Hz to search for. The frequency must match an exact note.</param>
-  /// <returns>Returns the note name matching the frequency. Returns NULL on invalid frequency.</returns>
-  static const char * getNoteName(int iFreq);
-
-  /// <summary>Get the note name that 'best' matches the given frequency.</summary>
-  /// <param name="iFreq">The frequency in Hz to search for.</param>
-  /// <param name="iEpsilon">The epsilon value for tolerance.</param>
-  /// <returns>Returns the note name matching the frequency. Returns NULL when no note matches the given frequency.</returns>
-  static const char * getNoteName(int iFreq, int iEpsilon);
-
 private:
   //private methods
 

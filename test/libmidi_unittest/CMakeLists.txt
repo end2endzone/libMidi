@@ -5,6 +5,8 @@ add_executable(libmidi_unittest
   main.cpp
   TestMidiFile.cpp
   TestMidiFile.h
+  TestNotes.cpp
+  TestNotes.h
   ${CMAKE_SOURCE_DIR}/src/common/varlength.h
 )
 

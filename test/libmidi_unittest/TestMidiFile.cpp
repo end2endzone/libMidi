@@ -346,49 +346,6 @@ TEST_F(TestMidiFile, testGetInstrumentName)
   ASSERT_TRUE( std::string("Acoustic Grand Piano") == MidiFile::getInstrumentName((char)0xff) );
 }
 
-TEST_F(TestMidiFile, testFindNoteFrequency)
-{
-  ASSERT_EQ(-1, MidiFile::findNoteFrequency(NULL) );  //invalid
-  ASSERT_EQ(-1, MidiFile::findNoteFrequency("") );  //empty
-  ASSERT_EQ(-1, MidiFile::findNoteFrequency("FOOBAR") ); //unknown
-
-  ASSERT_EQ(NOTE_SILENCE, MidiFile::findNoteFrequency("SILENCE") );  //silence
-
-  ASSERT_EQ(NOTE_C0 , MidiFile::findNoteFrequency("C0" ) );
-  ASSERT_EQ(NOTE_GS9, MidiFile::findNoteFrequency("GS9") );
-  ASSERT_EQ(NOTE_AS0, MidiFile::findNoteFrequency("AS0") );
-  ASSERT_EQ(NOTE_GS9, MidiFile::findNoteFrequency("GS9") );
-}
-
-TEST_F(TestMidiFile, testGetNoteName)
-{
-  ASSERT_EQ(NULL, MidiFile::getNoteName(-5) );  //invalid
-  ASSERT_EQ(NULL, MidiFile::getNoteName(1000) ); //unknown
-
-  ASSERT_STREQ("SILENCE", MidiFile::getNoteName(0) );  //silence
-
-  ASSERT_STREQ("C0",  MidiFile::getNoteName(NOTE_C0) );
-  ASSERT_STREQ("GS9", MidiFile::getNoteName(NOTE_GS9) );
-  ASSERT_STREQ("AS0", MidiFile::getNoteName(NOTE_AS0) );
-  ASSERT_STREQ("GS9", MidiFile::getNoteName(NOTE_GS9) );
-}
-
-TEST_F(TestMidiFile, testGetNoteNameEpsilon)
-{
-  static const int HUGE_EPSILON = 10000000;
-  static const int SMALL_EPSILON = 1;
-  ASSERT_EQ(NULL, MidiFile::getNoteName(-5, HUGE_EPSILON) );  //invalid
-
-  ASSERT_STREQ("SILENCE", MidiFile::getNoteName(0, HUGE_EPSILON) );  //silence
-
-  ASSERT_STREQ("C6", MidiFile::getNoteName(NOTE_C6,       HUGE_EPSILON) );  //exact note frequency
-  ASSERT_STREQ("C6", MidiFile::getNoteName(NOTE_C6 + 1,   SMALL_EPSILON) ); //frequency too high
-  ASSERT_STREQ("C6", MidiFile::getNoteName(NOTE_C6 - 1,   SMALL_EPSILON) ); //frequency too low
-  ASSERT_STREQ(NULL, MidiFile::getNoteName(NOTE_C6 + 10,  SMALL_EPSILON) ); //outside of epsilon
-  ASSERT_STREQ("C6", MidiFile::getNoteName(NOTE_C6 - 5,   100) ); //epsilon matches NOTE_B5, NOTE_C6 and NOTE_CS6. NOTE_C6 is the closest.
-  ASSERT_STREQ("C6", MidiFile::getNoteName(NOTE_C6 + 5,   100) ); //epsilon matches NOTE_B5, NOTE_C6 and NOTE_CS6. NOTE_C6 is the closest.
-}
-
 TEST_F(TestMidiFile, testAllInstruments)
 {
   MidiFile f;
