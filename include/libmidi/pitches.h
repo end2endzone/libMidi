@@ -29,6 +29,7 @@
  * Notes Constants
  *************************************************/
 #define NOTE_REST 0
+#define NOTE_SILENCE 0
 
 #define NOTE_C0  16
 #define NOTE_CS0 17
