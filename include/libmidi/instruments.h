@@ -168,17 +168,18 @@ static const char * gInstruments[] = {
 typedef int8_t INSTRUMENT;
 static const INSTRUMENT MIN_INSTRUMENT = (INSTRUMENT)0x00;
 static const INSTRUMENT MAX_INSTRUMENT = (INSTRUMENT)0x7F;
+static const INSTRUMENT INVALID_INSTRUMENT = (INSTRUMENT)0xFF;
 
 /// <summary>Finds a MIDI intrument id by name.</summary>
 /// <param name="iName">The given name of the intrument.</param>
 /// <returns>An identifier that matches the given instrument name.
-/// Returns a default instrument id if the name is unknown, NULL, or empty.
+/// Returns INVALID_INSTRUMENT if the name is unknown, NULL, or empty.
 /// </returns>
 INSTRUMENT findInstrument(const char * iName);
 
 /// <summary>Get the instrument name that matches the given intrument id.</summary>
 /// <param name="iInstrument">The instrument id to search for.</param>
-/// <returns>Returns the instrument name matching the given id. Returns the name of the default instrument on invalid intrument id.</returns>
+/// <returns>Returns the instrument name matching the given id. Returns NULL on invalid intrument id.</returns>
 const char * getInstrumentName(INSTRUMENT iInstrument);
 
 }; //namespace libmidi

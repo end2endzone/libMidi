@@ -37,7 +37,7 @@ namespace libmidi
 INSTRUMENT findInstrument(const char * iName)
 {
   if (iName == NULL)
-    return 0x00; //DEFAULT_INSTRUMENT
+    return INVALID_INSTRUMENT;
   std::string name = iName;
   for(INSTRUMENT i=MIN_INSTRUMENT; i>=MIN_INSTRUMENT && i<=MAX_INSTRUMENT; i++)
   {
@@ -45,13 +45,13 @@ INSTRUMENT findInstrument(const char * iName)
     if (name == currentName)
       return i;
   }
-  return 0x00; //DEFAULT_INSTRUMENT
+  return INVALID_INSTRUMENT;
 }
 
 const char * getInstrumentName(INSTRUMENT iInstrument)
 {
   if (iInstrument < MIN_INSTRUMENT || iInstrument > MAX_INSTRUMENT)
-    return gInstruments[0x00]; //DEFAULT_INSTRUMENT
+    return NULL;
   return gInstruments[iInstrument];
 }
 

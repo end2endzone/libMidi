@@ -39,20 +39,30 @@ void TestInstruments::TearDown()
 {
 }
 
+TEST_F(TestInstruments, testMAX_INSTRUMENT)
+{
+  size_t gInstrumentsCount = sizeof(gInstruments)/sizeof(gInstruments[0]);
+  INSTRUMENT lastInstrument = (INSTRUMENT)(gInstrumentsCount - 1);
+
+  ASSERT_EQ(MAX_INSTRUMENT, lastInstrument );
+}
+
 TEST_F(TestInstruments, testFindInstrument)
 {
-  ASSERT_EQ(0x00, findInstrument("") );
-  ASSERT_EQ(0x00, findInstrument(NULL) );
+  ASSERT_EQ(INVALID_INSTRUMENT, findInstrument("") );     //invalid
+  ASSERT_EQ(INVALID_INSTRUMENT, findInstrument(NULL) );   //invalid
   ASSERT_EQ(0x00, findInstrument("Acoustic Grand Piano") );
   ASSERT_EQ(0x01, findInstrument("Bright Acoustic Piano") );
   ASSERT_EQ(0x7f, findInstrument("Gunshot") );
+  ASSERT_EQ(MIN_INSTRUMENT, findInstrument("Acoustic Grand Piano") );
+  ASSERT_EQ(MAX_INSTRUMENT, findInstrument("Gunshot") );
 }
 
 TEST_F(TestInstruments, testGetInstrumentName)
 {
+  ASSERT_EQ( NULL, getInstrumentName(-1) );           //invalid
+  ASSERT_EQ( NULL, getInstrumentName((char)0xff) );   //invalid
   ASSERT_TRUE( std::string("Acoustic Grand Piano") == getInstrumentName(0x00) );
-  ASSERT_TRUE( std::string("Acoustic Grand Piano") == getInstrumentName(-1) );
   ASSERT_TRUE( std::string("Bright Acoustic Piano") == getInstrumentName(0x01) );
   ASSERT_TRUE( std::string("Gunshot") == getInstrumentName(0x7f) );
-  ASSERT_TRUE( std::string("Acoustic Grand Piano") == getInstrumentName((char)0xff) );
 }

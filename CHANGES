@@ -1,6 +1,7 @@
 Changes for 2.0.0:
 
 * Fixed issue #1 : Created 'libmidi' namespace.
+* Fixed issue #5 : Clarify return values of api when a given value is not found.
 * Fixed issue #6 : Moved instruments and notes 'find' and getter functions outside of MidiFile class.
 
 Changes for 1.2.0:
