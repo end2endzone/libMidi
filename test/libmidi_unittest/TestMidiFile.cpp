@@ -34,6 +34,8 @@
 
 #include "TestMidiFile.h"
 
+using namespace libmidi;
+
 typedef std::vector<unsigned char> CharSequence;
 
 extern const char * getTestInputFolder();

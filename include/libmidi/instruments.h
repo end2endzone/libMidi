@@ -27,6 +27,9 @@
 
 #include <stdint.h> //for int8_t
 
+namespace libmidi
+{
+
 //
 // Description:
 //  Instrument codes according to https://en.wikipedia.org/wiki/General_MIDI
@@ -177,5 +180,7 @@ INSTRUMENT findInstrument(const char * iName);
 /// <param name="iInstrument">The instrument id to search for.</param>
 /// <returns>Returns the instrument name matching the given id. Returns the name of the default instrument on invalid intrument id.</returns>
 const char * getInstrumentName(INSTRUMENT iInstrument);
+
+}; //namespace libmidi
 
 #endif //INSTRUMENTS_H

@@ -25,6 +25,9 @@
 #ifndef MIDIPITCHES_H
 #define MIDIPITCHES_H
 
+namespace libmidi
+{
+
 /*************************************************
  * Notes Constants
  *************************************************/
@@ -235,5 +238,7 @@
 #define NOTE_FB9 NOTE_ES9
 #define NOTE_GB9 NOTE_FS9
 #define NOTE_AB9 NOTE_GS9
+
+}; //namespace libmidi
 
 #endif //MIDIPITCHES_H

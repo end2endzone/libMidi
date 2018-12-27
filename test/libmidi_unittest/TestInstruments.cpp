@@ -29,6 +29,8 @@
 
 #include "TestInstruments.h"
 
+using namespace libmidi;
+
 void TestInstruments::SetUp()
 {
 }

@@ -25,6 +25,9 @@
 #ifndef NOTES_H
 #define NOTES_H
 
+namespace libmidi
+{
+
 /// <summary>Finds a note frequency by name.</summary>
 /// <param name="iName">The given name of the note.</param>
 /// <returns>An identifier that matches the given note name.
@@ -42,5 +45,7 @@ const char * getNoteName(int iFreq);
 /// <param name="iEpsilon">The epsilon value for tolerance.</param>
 /// <returns>Returns the note name matching the frequency. Returns NULL when no note matches the given frequency.</returns>
 const char * getNoteName(int iFreq, int iEpsilon);
+
+}; //namespace libmidi
 
 #endif //NOTES_H

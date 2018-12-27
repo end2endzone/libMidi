@@ -31,6 +31,7 @@
 #include "rapidassist/random.h"
 
 using namespace ra::random;
+using namespace libmidi;
 
 int demo_create_mario_1up(int argc, char **argv)
 {

@@ -34,6 +34,9 @@
 
 #include "varlength.h"
 
+namespace libmidi
+{
+
 typedef uint32_t HEADER_ID;
 static const HEADER_ID MIDI_FILE_ID = 0x4d546864; //"MThd"
 static const HEADER_ID MIDI_TRACK_HEADER_ID = 0x4d54726b; //"MTrk"
@@ -619,3 +622,5 @@ bool MidiFile::save(const char * iFile)
   fclose(fout);
   return true;
 }
+
+}; //namespace libmidi

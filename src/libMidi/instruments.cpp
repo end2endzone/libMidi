@@ -31,6 +31,9 @@
 
 #include <string>   //for NULL
 
+namespace libmidi
+{
+
 INSTRUMENT findInstrument(const char * iName)
 {
   if (iName == NULL)
@@ -51,3 +54,5 @@ const char * getInstrumentName(INSTRUMENT iInstrument)
     return gInstruments[0x00]; //DEFAULT_INSTRUMENT
   return gInstruments[iInstrument];
 }
+
+}; //namespace libmidi

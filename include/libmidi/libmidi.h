@@ -32,6 +32,9 @@
 #include <vector>
 #include <string>
 
+namespace libmidi
+{
+
 /// <summary>
 /// Defines the MidiFile class.
 /// </summary>
@@ -189,5 +192,7 @@ private:
   TRACK_ENDING_PREFERENCE mTrackEndingPreference;
   MIDI_TYPE mType;
 };
+
+}; //namespace libmidi
 
 #endif //LIBMIDI_H

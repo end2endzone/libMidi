@@ -29,6 +29,9 @@
 #include <cstdio> //for fwrite(), fopen(), ftell(), fclose()
 #include <cstdlib> //for abs()
 
+namespace libmidi
+{
+
 /// <summary>
 /// Computes a 32-bits mask for reading the nth block of 7 bits long.
 /// </summary>
@@ -180,5 +183,7 @@ size_t fwriteVariableLength(const T & iValue, FILE * f)
 {
   return fwriteVariableLength(iValue, 0, f);
 }
+
+}; //namespace libmidi
 
 #endif //VARIABLE_LENGTH_H

@@ -33,6 +33,9 @@
 #include <cstdlib>  //for abs()
 #include <string>   //for NULL
 
+namespace libmidi
+{
+
 struct NOTEDEF
 {
   int freq;
@@ -295,3 +298,5 @@ const char * getNoteName(int iFreq, int iEpsilon)
   }
   return best_name;
 }
+
+}; //namespace libmidi

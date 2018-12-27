@@ -30,6 +30,8 @@
 
 #include "TestNotes.h"
 
+using namespace libmidi;
+
 void TestNotes::SetUp()
 {
 }
