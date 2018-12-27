@@ -31,11 +31,10 @@
 #include "rapidassist/random.h"
 
 using namespace ra::random;
-using namespace libmidi;
 
 int demo_create_mario_1up(int argc, char **argv)
 {
-  MidiFile f;
+  libmidi::MidiFile f;
  
   f.setInstrument(0x51);  // "Lead 2 (sawtooth)"
   f.setTempo(0x051615);   // 333333 microseconds per quarter note
@@ -66,7 +65,7 @@ int demo_play_random_piano(int argc, char **argv)
   std::vector<std::string> piano_instruments;
   for(int8_t i=0; i<=127 && i >= 0; i++)
   {
-    std::string name = getInstrumentName(i);
+    std::string name = libmidi::getInstrumentName(i);
     if (name.find("Piano") != std::string::npos)
       piano_instruments.push_back(name);
   }
@@ -77,9 +76,9 @@ int demo_play_random_piano(int argc, char **argv)
   const char * selected_piano_instrument = piano_instruments[selection].c_str();
 
   //create the melody
-  MidiFile f;
+  libmidi::MidiFile f;
 
-  f.setInstrument(findInstrument(selected_piano_instrument));
+  f.setInstrument(libmidi::findInstrument(selected_piano_instrument));
   f.setTicksPerQuarterNote(0x80);
   f.addNote(NOTE_C4, 500); // 262 Hz
   f.addNote(NOTE_D4, 500); // 294 Hz
