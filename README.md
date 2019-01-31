@@ -1,3 +1,6 @@
+![libMidi logo](docs/libMidi-splashscreen.png?raw=true)
+
+
 # libMidi #
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Github Releases](https://img.shields.io/github/release/end2endzone/libmidi.svg)](https://github.com/end2endzone/libmidi/releases)
