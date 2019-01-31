@@ -1,4 +1,4 @@
-![libMidi logo](docs/libMidi-splashscreen.png?raw=true)
+![libMidi logo](docs/libMidi-splashscreen.jpg?raw=true)
 
 
 # libMidi #
